@@ -51,13 +51,7 @@ class TfidfEmbeddingVectorizer(object):
             ])
 
 
-if __name__ == "__main__":
-    DIMENSION = 200
-    SHUFFLE = False
-    WORD2VEC_PATH = "wordvec_d%d.txt" % DIMENSION
-    RAW_TEXT_PATH = "raw_text.txt"
-    METRICS_PATH = "metrics_word2vec.csv"
-
+def main():
     # Read pre-trained list
     with open(WORD2VEC_PATH, "r") as lines:
         w2v = {line.split()[0]: np.array(list(map(float, line.split()[1:])))
@@ -125,3 +119,12 @@ if __name__ == "__main__":
                              rst[model][0],
                              rst[model][1],
                              rst[model][2]))
+
+
+if __name__ == "__main__":
+    DIMENSION = 200
+    SHUFFLE = False
+    WORD2VEC_PATH = "wordvec_d%d.txt" % DIMENSION
+    RAW_TEXT_PATH = "raw_text.txt"
+    METRICS_PATH = "metrics_word2vec.csv"
+    main()
