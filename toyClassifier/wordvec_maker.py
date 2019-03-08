@@ -1,5 +1,5 @@
 
-dimension = 50
+dimension = 200
 
 raw_text_file = 'raw_text.txt'
 raw_word_vec_file = 'glove.6B.' + str(dimension) + 'd.txt'
@@ -21,4 +21,4 @@ with open(raw_text_file, 'r') as f_txt:
                     vec_data[word] = raw_vec_data[word]
         with open(word_vec_file, 'w+') as f_vec:
             for word in vec_data:
-                f_vec.write("%s\t%s" % (word, vec_data[word]))
+                f_vec.write("%s %s" % (word, vec_data[word]))
