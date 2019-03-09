@@ -77,7 +77,7 @@ def main():
     ])
     models['Neural Network'] = Pipeline([
         ('word2vec vectorizer', MeanEmbeddingVectorizer(w2v, DIMENSION)),
-        ('neural network', neural_network.MLPClassifier(verbose=True))
+        ('neural network', neural_network.MLPClassifier(verbose=True, max_iter=10000))
     ])
     models['Extra Tree'] = Pipeline([
         ('word2vec vectorizer', MeanEmbeddingVectorizer(w2v, DIMENSION)),
@@ -109,6 +109,7 @@ def main():
         recall = np.mean(recall)
         f1 = np.mean(f1)
         rst[model] = accuracy, recall, f1
+        print(metrics.classification_report(test_label, test_pred))
 
     # Store metrics
     with open(METRICS_PATH, "w+") as f_metrics:

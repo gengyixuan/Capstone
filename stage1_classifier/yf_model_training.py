@@ -88,6 +88,7 @@ def get_one_training_example(one_sample, one_meta_sample, postag_index_dict, sto
             #------------------------------------------------------------------
             one_token_vec = np.append(word_embed_vec_list, postag_vec_list)
             one_token_vec = np.append(one_token_vec, one_token_len)
+            # one_token_vec = word_embed_vec_list
 
             if sample_dim == 0:
                 sample_dim = one_token_vec.shape[0]
