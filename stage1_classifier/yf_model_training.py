@@ -15,7 +15,7 @@ vector_dim = 0
 postag_dim = 0
 sample_dim = 0
 
-max_iter = 100
+max_iter = 50
 
 
 def get_postag_mapping():
@@ -97,10 +97,12 @@ def get_one_training_example(one_sample, one_meta_sample, postag_index_dict, sto
     
     #---------------------------------------------------------------------
     sample_vec = np.zeros(sample_dim)
-    token_weight = 1.0 / len(token_vec_list)  # use average weight
 
-    for index in range(len(token_vec_list)):
-        sample_vec += token_vec_list[index] * token_weight
+    if len(token_vec_list) > 0:
+        token_weight = 1.0 / len(token_vec_list)  # use average weight
+
+        for index in range(len(token_vec_list)):
+            sample_vec += token_vec_list[index] * token_weight
     
     # print(sample_vec.shape)
     return one_label, sample_vec
@@ -138,10 +140,10 @@ def model_training(X_arr, Y_arr):
     X_train, X_test, y_train, y_test = train_test_split(X_arr, Y_arr, test_size=0.2)
 
     clf = MLPClassifier(
-        hidden_layer_sizes=(1000, ),
+        hidden_layer_sizes=(1000, 1000),
         activation='relu',
         solver='adam',
-        alpha=0.0001,
+        alpha=0.0002,
         batch_size='auto',
         learning_rate='constant',
         learning_rate_init=0.01,
@@ -154,7 +156,7 @@ def model_training(X_arr, Y_arr):
         warm_start=False,
         momentum=0.9,
         nesterovs_momentum=True,
-        early_stopping=True,
+        early_stopping=False,
         validation_fraction=0.1,
         beta_1=0.9, beta_2=0.999, epsilon=1e-08,
         n_iter_no_change=10)
