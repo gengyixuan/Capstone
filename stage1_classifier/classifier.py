@@ -40,19 +40,30 @@ def model_training(X, Y, test_ratio, verbose_mode, model):
         clf.fit(X_train, y_train)
         y_predict = clf.predict(X_test)
         res = sklearn.metrics.classification_report(y_test, y_predict)
-        print(res)
+        # print(res)
         ret = dict()
         ret["MLP"] = report_parser(res)
-        return 
+        return ret
+
     elif model == "NaiveBayes":
         clf = GaussianNB().fit(X_train, y_train)
         y_pred = clf.predict(X_test)
         res = metrics.classification_report(y_test, y_pred)
-        print(res)
-        return res
-    else:
+        # print(res)
+        ret = dict()
+        ret["NaiveBayes"] = report_parser(res)
+        return ret
+
+    elif model == "SVM":
         clf = svm.LinearSVC(random_state=0, tol=1e-5).fit(X_train, y_train)
         y_pred = clf.predict(X_test)
         res = metrics.classification_report(y_test, y_pred)
-        print(res)
-        return res
+        # print(res)
+        ret = dict()
+        ret["SVM"] = report_parser(res)
+        return ret
+    
+    else:
+        ret = dict()
+        print("no available model")
+        return dict
