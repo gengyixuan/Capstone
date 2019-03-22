@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.pipeline import Pipeline
 from sklearn import *
 from collections import defaultdict
+from utils import print_metrics
 
 
 # Build vectorizer
@@ -51,16 +52,19 @@ class TfidfEmbeddingVectorizer(object):
             ])
 
 
-def main():
+def classify_word2vec(dimension, shuffle, training_ratio):
+
+    word2vec_path = "word_embeddings/glove.6B.%dd.txt" % dimension
+    raw_text_path = "topicclass/topicclass_train_mid.txt"
     # Read pre-trained list
-    with open(WORD2VEC_PATH, "r") as lines:
+    with open(word2vec_path, "r") as lines:
         w2v = {line.split()[0]: np.array(list(map(float, line.split()[1:])))
                for line in lines}
 
     # Read from raw text
     label = []
     data = []
-    with open(RAW_TEXT_PATH, "r") as lines:
+    with open(raw_text_path, "r") as lines:
         for line in lines:
             segs = line.split("|||")
             label.append(segs[0])
@@ -70,36 +74,57 @@ def main():
 
     # Build pipeline
     models = dict()
-
     models['SVM'] = Pipeline([
-        ('word2vec vectorizer', MeanEmbeddingVectorizer(w2v, DIMENSION)),
+        ('word2vec vectorizer', MeanEmbeddingVectorizer(w2v, dimension)),
         ('svm', svm.LinearSVC(random_state=0, tol=1e-5))
     ])
     models['Neural Network'] = Pipeline([
-        ('word2vec vectorizer', MeanEmbeddingVectorizer(w2v, DIMENSION)),
-        ('neural network', neural_network.MLPClassifier(verbose=True, max_iter=10000))
+        ('word2vec vectorizer', MeanEmbeddingVectorizer(w2v, dimension)),
+        ('neural network', neural_network.MLPClassifier(
+                hidden_layer_sizes=(1000, ),
+                activation='relu',
+                solver='adam',
+                alpha=0.0001,
+                batch_size='auto',
+                learning_rate='constant',
+                learning_rate_init=0.01,
+                power_t=0.5,
+                max_iter=10000,
+                shuffle=True,
+                random_state=None,
+                tol=0.0001,
+                verbose=True,
+                warm_start=False,
+                momentum=0.9,
+                nesterovs_momentum=True,
+                early_stopping=True,
+                validation_fraction=0.1,
+                beta_1=0.9, beta_2=0.999, epsilon=1e-08,
+                n_iter_no_change=10))
     ])
     models['Extra Tree'] = Pipeline([
-        ('word2vec vectorizer', MeanEmbeddingVectorizer(w2v, DIMENSION)),
+        ('word2vec vectorizer', MeanEmbeddingVectorizer(w2v, dimension)),
         ('extra tree', ensemble.ExtraTreesClassifier(n_estimators=200))
     ])
 
-    # Shuffle dataset
-    if SHUFFLE:
+    # shuffle dataset
+    if shuffle:
         data_label = np.c_[data.reshape(len(data), -1), label.reshape(len(label), -1)]
         np.random.shuffle(data_label)
         data = data_label[:, :data.size//len(data)].reshape(data.shape)
         label = data_label[:, data.size//len(data):].reshape(label.shape)
 
     # Split dataset
-    train_data = data[:500]
-    train_label = label[:500]
-    test_data = data[500:]
-    test_label = label[500:]
+    train_data_size = int(len(data) * training_ratio)
+    train_data = data[:train_data_size]
+    train_label = label[:train_data_size]
+    test_data = data[train_data_size:]
+    test_label = label[train_data_size:]
 
     # Train and test
     rst = dict()
     for model in models:
+        print("Start evaluating: %s" % model)
         rst[model] = dict()
         models[model].fit(train_data, train_label)
         test_pred = models[model].predict(test_data)
@@ -110,23 +135,17 @@ def main():
         f1 = np.mean(f1)
         rst[model] = accuracy, recall, f1
         print(metrics.classification_report(test_label, test_pred))
+    return rst
 
-    # Store metrics
-    with open(METRICS_PATH, "w+") as f_metrics:
-        f_metrics.write("Model, Accuracy, Recall, F1\n")
-        for model in models:
-            f_metrics.write("%s, %.4f, %.4f, %.4f\n" %
-                            (model,
-                             rst[model][0],
-                             rst[model][1],
-                             rst[model][2]))
+
+def main():
+    dimension = 300
+    shuffle = False
+    training_ratio = 0.8
+    metrics_path = "output/metrics_word2vec.csv"
+    rst = classify_word2vec(dimension, shuffle, training_ratio)
+    print_metrics(rst, metrics_path)
 
 
 if __name__ == "__main__":
-    DIMENSION = 300
-    SHUFFLE = False
-    # WORD2VEC_PATH = "wordvec_d%d.txt" % DIMENSION
-    WORD2VEC_PATH = "word_embeddings/wordvec_d300.txt"
-    RAW_TEXT_PATH = "topicclass/topicclass_train_mid.txt"
-    METRICS_PATH = "output/metrics_word2vec.csv"
     main()
