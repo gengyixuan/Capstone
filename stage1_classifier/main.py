@@ -34,9 +34,8 @@ def main():
     rst.update(ret_report_concat)
 
     print(rst)
-
     # print metrics
-    # print_metrics(rst, metrics_path)
+    print_metrics(rst, metrics_path)
 
 
 if __name__ == '__main__':

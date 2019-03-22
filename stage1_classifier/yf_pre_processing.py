@@ -77,7 +77,7 @@ def extract_word_cnt(file_name):
 
 def save_subset_vector(word_dict, verbose_mode):
     fin = io.open(word_embedding_file, 'r', encoding='utf-8', newline='\n', errors='ignore')
-    n, d = map(int, fin.readline().split())
+    # n, d = map(int, fin.readline().split())
     data = {}
     hit_dict = {}
 

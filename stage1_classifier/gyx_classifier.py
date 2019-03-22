@@ -134,4 +134,4 @@ def classify_meta(raw_text_file, train_ratio, verbose_mode):
 
 if __name__ == "__main__":
     raw_text_path = "topicclass/topicclass_train_small.txt"
-    _ = classify_meta(raw_text_path)
+    _ = classify_meta(raw_text_path, 0.8, True)
