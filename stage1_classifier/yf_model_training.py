@@ -131,13 +131,13 @@ def get_training_data(postag_index_dict, stop_set, word_vector_dict):
     X_arr = np.array(X_list)
     Y_arr = np.array(Y_list)
 
-    print(X_arr.shape)
-    print(Y_arr.shape)
+    # print(X_arr.shape)
+    # print(Y_arr.shape)
     return X_arr, Y_arr
 
 
-def model_training(X_arr, Y_arr):
-    X_train, X_test, y_train, y_test = train_test_split(X_arr, Y_arr, test_size=0.2)
+def model_training(X_arr, Y_arr, test_ratio, verbose_mode):
+    X_train, X_test, y_train, y_test = train_test_split(X_arr, Y_arr, test_size=test_ratio)
 
     clf = MLPClassifier(
         hidden_layer_sizes=(1000, 1000),
@@ -152,7 +152,7 @@ def model_training(X_arr, Y_arr):
         shuffle=True,
         random_state=None,
         tol=0.0001,
-        verbose=True,
+        verbose=verbose_mode,
         warm_start=False,
         momentum=0.9,
         nesterovs_momentum=True,
@@ -165,17 +165,19 @@ def model_training(X_arr, Y_arr):
     y_predict = clf.predict(X_test)
 
     res = sklearn.metrics.classification_report(y_test, y_predict)
-    print(res)
+    # print(res)
+    return res
 
 
-def main():
+def classify_concat(training_ratio, verbose_mode):
     postag_index_dict = get_postag_mapping()
     stop_set = load_stop_words()
     word_vector_dict = get_word_embedding_dict()
 
     X_arr, Y_arr = get_training_data(postag_index_dict, stop_set, word_vector_dict)
-    model_training(X_arr, Y_arr)
+    res = model_training(X_arr, Y_arr, 1.0-training_ratio, verbose_mode)
+    return res
 
 
 if __name__ == "__main__":
-    main()
+    _ = classify_concat(0.8)

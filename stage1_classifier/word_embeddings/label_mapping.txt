@@ -1,16 +1,13 @@
-Social sciences and society ||| 0
-Sports and recreation ||| 1
-Natural sciences ||| 2
-Language and literature ||| 3
-Geography and places ||| 4
-Music ||| 5
-Media and drama ||| 6
-Art and architecture ||| 7
-Warfare ||| 8
+Sports and recreation ||| 0
+Media and drama ||| 1
+Music ||| 2
+Social sciences and society ||| 3
+History ||| 4
+Media and darama ||| 5
+Warfare ||| 6
+Natural sciences ||| 7
+Geography and places ||| 8
 Engineering and technology ||| 9
 Video games ||| 10
-Philosophy and religion ||| 11
-Agriculture, food and drink ||| 12
-History ||| 13
-Mathematics ||| 14
-Miscellaneous ||| 15
+Language and literature ||| 11
+Art and architecture ||| 12

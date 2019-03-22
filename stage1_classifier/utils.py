@@ -8,3 +8,13 @@ def print_metrics(rst, metrics_path):
                              rst[model][0],
                              rst[model][1],
                              rst[model][2]))
+
+
+def report_parser(report):
+    line_list = report.split('\n')
+    line = line_list[len(line_list)-2]
+    res_list = line.split()
+    precision = float(res_list[2])
+    recall = float(res_list[3])
+    f1 = float(res_list[4])
+    return [precision, recall, f1]

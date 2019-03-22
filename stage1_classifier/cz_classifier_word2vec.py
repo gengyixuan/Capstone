@@ -52,10 +52,10 @@ class TfidfEmbeddingVectorizer(object):
             ])
 
 
-def classify_word2vec(dimension, shuffle, training_ratio):
+def classify_word2vec(dimension, shuffle, training_ratio, raw_text_path, verbose_mode):
 
     word2vec_path = "word_embeddings/glove.6B.%dd.txt" % dimension
-    raw_text_path = "topicclass/topicclass_train_mid.txt"
+    # raw_text_path = "topicclass/topicclass_train_mid.txt"
     # Read pre-trained list
     with open(word2vec_path, "r") as lines:
         w2v = {line.split()[0]: np.array(list(map(float, line.split()[1:])))
@@ -93,7 +93,7 @@ def classify_word2vec(dimension, shuffle, training_ratio):
                 shuffle=True,
                 random_state=None,
                 tol=0.0001,
-                verbose=True,
+                verbose=verbose_mode,
                 warm_start=False,
                 momentum=0.9,
                 nesterovs_momentum=True,
@@ -124,7 +124,7 @@ def classify_word2vec(dimension, shuffle, training_ratio):
     # Train and test
     rst = dict()
     for model in models:
-        print("Start evaluating: %s" % model)
+        if verbose_mode: print("Start evaluating: %s" % model)
         rst[model] = dict()
         models[model].fit(train_data, train_label)
         test_pred = models[model].predict(test_data)
@@ -134,8 +134,9 @@ def classify_word2vec(dimension, shuffle, training_ratio):
         recall = np.mean(recall)
         f1 = np.mean(f1)
         rst[model] = accuracy, recall, f1
-        print(metrics.classification_report(test_label, test_pred))
-    return rst
+        ret_report = metrics.classification_report(test_label, test_pred)
+        if verbose_mode: print(ret_report)
+    return ret_report
 
 
 def main():

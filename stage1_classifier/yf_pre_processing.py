@@ -5,12 +5,14 @@ word_dict = {}
 
 word_embedding_file = "word_embeddings/wiki-news-300d-1M-subword.vec"
 word_subset_file = "word_embeddings/vector_subset.txt"
-train_path = "topicclass/topicclass_train_mid.txt"
 label_path = "word_embeddings/label_mapping.txt"
+
+train_p = "topicclass/topicclass_train_mid.txt"
+
 output_path = "pre_processed_data/pre_train.txt"
 
 
-def generate_mapping():
+def generate_mapping(train_path, verbose_mode):
     label_list = []
 
     with open(train_path, 'r', encoding='utf-8') as infile:
@@ -23,7 +25,7 @@ def generate_mapping():
     label_dict = {}
     with open(label_path, 'w') as outfile1:
         for index in range(len(label_list)):
-            print(str(label_list[index]) + ": " + str(index))
+            if verbose_mode: print(str(label_list[index]) + ": " + str(index))
             
             label_dict[label_list[index]] = index
 
@@ -44,7 +46,7 @@ def generate_mapping():
             oneline = all_data[line_index]
 
             if line_index % 5000 == 0:
-                print(line_index)
+                if verbose_mode: print(line_index)
 
             one_list = oneline.strip().split('|||')
             text_label = one_list[0].strip()
@@ -57,8 +59,8 @@ def generate_mapping():
                 out_one_line = str(digit_label) + " |||" + one_list[1]
                 outfile.writelines(out_one_line + '\n')
             except:
-                print("err at line: " + str(line_index))
-                print("err key: " + str(text_label))
+                if verbose_mode: print("err at line: " + str(line_index))
+                if verbose_mode: print("err key: " + str(text_label))
 
 
 def extract_word_cnt(file_name):
@@ -73,7 +75,7 @@ def extract_word_cnt(file_name):
                 word_dict[word] = 1
 
 
-def save_subset_vector(word_dict):
+def save_subset_vector(word_dict, verbose_mode):
     fin = io.open(word_embedding_file, 'r', encoding='utf-8', newline='\n', errors='ignore')
     n, d = map(int, fin.readline().split())
     data = {}
@@ -94,16 +96,16 @@ def save_subset_vector(word_dict):
                 outfile.writelines(str(one_word) + token_vec_str + "\n")
                 hit_dict[one_word] = 1
     
-    print("hit: " + str(len(hit_dict)))
+    if verbose_mode: print("hit: " + str(len(hit_dict)))
     return hit_dict
 
 
-def extract_vector_subset():
+def extract_vector_subset(verbose_mode):
     extract_word_cnt(output_path)
 
-    print("\nTotal unique number of words all sets: " + str(len(word_dict)))
+    if verbose_mode: print("\nTotal unique number of words all sets: " + str(len(word_dict)))
 
-    hit_dict = save_subset_vector(word_dict)
+    hit_dict = save_subset_vector(word_dict, verbose_mode)
 
     miss_list = []
     for one_key in word_dict:
@@ -111,15 +113,15 @@ def extract_vector_subset():
             miss_list.append(one_key)
     
     for index in range(len(miss_list)):
-        print(miss_list[index].encode('utf-8'))
+        if verbose_mode: print(miss_list[index].encode('utf-8'))
         if index > 10:
             break
 
 
-def main():
-    generate_mapping()
-    extract_vector_subset()
+def concat_preprocess(train_p, verbose_mode):
+    generate_mapping(train_p, verbose_mode)
+    extract_vector_subset(verbose_mode)
 
 
 if __name__ == "__main__":
-    main()
+    concat_preprocess()

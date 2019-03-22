@@ -32,30 +32,36 @@ def get_pos_tags(sentence):
     pos_tags = [tup[1] for tup in pos_tag_tups]
     return pos_tags, tokens
 
-raw_text_file = "topicclass/topicclass_train_mid.txt"
-output_file_sen = "pre_processed_data/sentence_meta.txt"
-output_file_aligned = "pre_processed_data/aligned_meta.txt"
+def meta_preprocess(raw_text_file, verbose_mode):
+    # raw_text_file = "topicclass/topicclass_train_small.txt"
+    output_file_sen = "pre_processed_data/sentence_meta.txt"
+    output_file_aligned = "pre_processed_data/aligned_meta.txt"
 
-with open(output_file_sen, "w+") as f_sen:
-    f_sen.write("True True\n")
-    with open(output_file_aligned, "w+") as f_ali:
-        f_ali.write("False True\n")
-        with open(raw_text_file) as f:
-            for line in f:
-                parts = line.split("|||")
-                sentence = parts[1].strip()
-                # get POS tags for each word
-                pos_tags, tokens = get_pos_tags(sentence)
+    with open(output_file_sen, "w+") as f_sen:
+        f_sen.write("True True\n")
+        with open(output_file_aligned, "w+") as f_ali:
+            f_ali.write("False True\n")
+            with open(raw_text_file) as f:
+                for line in f:
+                    parts = line.split("|||")
+                    sentence = parts[1].strip()
+                    # get POS tags for each word
+                    pos_tags, tokens = get_pos_tags(sentence)
 
-                # output sentence_meta
-                META_SENLEN = len(sentence)
-                META_NUMWORDS = len(tokens)
-                f_sen.write(str(META_SENLEN) + "\t" + str(META_NUMWORDS) + "\n")
+                    # output sentence_meta
+                    META_SENLEN = len(sentence)
+                    META_NUMWORDS = len(tokens)
+                    f_sen.write(str(META_SENLEN) + "\t" + str(META_NUMWORDS) + "\n")
 
-                # output aligned meta
-                for tag in pos_tags:
-                    f_ali.write(tag + "\t")
-                f_ali.write("\n")
-                for token in tokens:
-                    f_ali.write(str(len(token)) + "\t")
-                f_ali.write("\n")
+                    # output aligned meta
+                    for tag in pos_tags:
+                        f_ali.write(tag + "\t")
+                    f_ali.write("\n")
+                    for token in tokens:
+                        f_ali.write(str(len(token)) + "\t")
+                    f_ali.write("\n")
+
+
+if __name__ == "__main__":
+    raw_text_file = "topicclass/topicclass_train_small.txt"
+    meta_preprocess(raw_text_file)
