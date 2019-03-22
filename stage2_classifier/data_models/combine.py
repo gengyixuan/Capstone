@@ -11,15 +11,8 @@ sample_dim = 0
 def data_model_combine(train_p, verbose_mode):
     word_dict = {}
 
-<<<<<<< HEAD
-    # input
-    word_embedding_file = "word_embeddings/wordvec_d300.txt"
-    word_subset_file = "word_embeddings/vector_subset.txt"
-    label_path = "word_embeddings/label_mapping.txt"
-=======
     # input from embedding files
-    word_embedding_file = "word_embeddings/glove.6B.300d.txt"
->>>>>>> 19cfd46cb3a5e083dfab6449e02b8aee5941748c
+    word_embedding_file = "word_embeddings/wordvec_d300.txt"
 
     # input intermediate files
     postag_info_file = "word_embeddings/pos_tag_key.txt"
