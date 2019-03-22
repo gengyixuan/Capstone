@@ -1,9 +1,12 @@
 import sys
 import numpy as np
 import sklearn
+from sklearn import *
+from sklearn.naive_bayes import GaussianNB
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import train_test_split
 from utils import report_parser
+from sklearn import metrics
 
 
 postag_info_file = "word_embeddings/pos_tag_key.txt"
@@ -137,46 +140,61 @@ def get_training_data(postag_index_dict, stop_set, word_vector_dict):
     return X_arr, Y_arr
 
 
-def model_training(X_arr, Y_arr, test_ratio, verbose_mode):
+def model_training(X_arr, Y_arr, test_ratio, verbose_mode, model):
     X_train, X_test, y_train, y_test = train_test_split(X_arr, Y_arr, test_size=test_ratio)
 
-    clf = MLPClassifier(
-        hidden_layer_sizes=(1000, 1000),
-        activation='relu',
-        solver='adam',
-        alpha=0.0002,
-        batch_size='auto',
-        learning_rate='constant',
-        learning_rate_init=0.01,
-        power_t=0.5,
-        max_iter=max_iter,
-        shuffle=True,
-        random_state=None,
-        tol=0.0001,
-        verbose=verbose_mode,
-        warm_start=False,
-        momentum=0.9,
-        nesterovs_momentum=True,
-        early_stopping=False,
-        validation_fraction=0.1,
-        beta_1=0.9, beta_2=0.999, epsilon=1e-08,
-        n_iter_no_change=10)
+    if model == "MLP":
+        clf = MLPClassifier(
+            hidden_layer_sizes=(1000, 1000),
+            activation='relu',
+            solver='adam',
+            alpha=0.0002,
+            batch_size='auto',
+            learning_rate='constant',
+            learning_rate_init=0.01,
+            power_t=0.5,
+            max_iter=max_iter,
+            shuffle=True,
+            random_state=None,
+            tol=0.0001,
+            verbose=verbose_mode,
+            warm_start=False,
+            momentum=0.9,
+            nesterovs_momentum=True,
+            early_stopping=False,
+            validation_fraction=0.1,
+            beta_1=0.9, beta_2=0.999, epsilon=1e-08,
+            n_iter_no_change=10)
 
-    clf.fit(X_train, y_train)
-    y_predict = clf.predict(X_test)
+        clf.fit(X_train, y_train)
+        y_predict = clf.predict(X_test)
+        res = sklearn.metrics.classification_report(y_test, y_predict)
+        print(res)
+        ret = dict()
+        ret["MLP"] = report_parser(res)
+        return 
+    elif model == "NaiveBayes":
+        clf = GaussianNB().fit(X_train, y_train)
+        y_pred = clf.predict(X_test)
+        res = metrics.classification_report(y_test, y_pred)
+        print(res)
+        return res
+    else:
+        clf = svm.LinearSVC(random_state=0, tol=1e-5).fit(X_train, y_train)
+        y_pred = clf.predict(X_test)
+        res = metrics.classification_report(y_test, y_pred)
+        print(res)
+        return res
 
-    res = sklearn.metrics.classification_report(y_test, y_predict)
-    # print(res)
-    return res
 
 
-def classify_concat(training_ratio, verbose_mode):
+def classify_concat(training_ratio, verbose_mode, model):
     postag_index_dict = get_postag_mapping()
     stop_set = load_stop_words()
     word_vector_dict = get_word_embedding_dict()
 
     X_arr, Y_arr = get_training_data(postag_index_dict, stop_set, word_vector_dict)
-    res = model_training(X_arr, Y_arr, 1.0-training_ratio, verbose_mode)
+    res = model_training(X_arr, Y_arr, 1.0-training_ratio, verbose_mode, model)
     
     rst = dict()
     rst['concat model'] = report_parser(res)
@@ -184,4 +202,4 @@ def classify_concat(training_ratio, verbose_mode):
 
 
 if __name__ == "__main__":
-    _ = classify_concat(0.8, True)
+    _ = classify_concat(0.8, True, "NaiveBayes")
