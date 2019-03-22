@@ -3,6 +3,7 @@ from sklearn.pipeline import Pipeline
 from sklearn import *
 from collections import defaultdict
 from utils import print_metrics
+from utils import report_parser
 
 
 # Build vectorizer
@@ -134,9 +135,13 @@ def classify_word2vec(dimension, shuffle, training_ratio, raw_text_path, verbose
         recall = np.mean(recall)
         f1 = np.mean(f1)
         rst[model] = accuracy, recall, f1
+        
         ret_report = metrics.classification_report(test_label, test_pred)
+        rst[model] = report_parser(ret_report)
+
         if verbose_mode: print(ret_report)
-    return ret_report
+    
+    return rst
 
 
 def main():

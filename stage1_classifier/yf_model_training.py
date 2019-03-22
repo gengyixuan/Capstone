@@ -3,6 +3,7 @@ import numpy as np
 import sklearn
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import train_test_split
+from utils import report_parser
 
 
 postag_info_file = "word_embeddings/pos_tag_key.txt"
@@ -176,7 +177,10 @@ def classify_concat(training_ratio, verbose_mode):
 
     X_arr, Y_arr = get_training_data(postag_index_dict, stop_set, word_vector_dict)
     res = model_training(X_arr, Y_arr, 1.0-training_ratio, verbose_mode)
-    return res
+    
+    rst = dict()
+    rst['concat model'] = report_parser(res)
+    return rst
 
 
 if __name__ == "__main__":

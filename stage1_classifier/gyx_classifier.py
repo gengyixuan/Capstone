@@ -6,6 +6,7 @@
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import train_test_split
 import numpy as np
+from utils import report_parser
 
 
 def classify_meta(raw_text_file, train_ratio, verbose_mode):
@@ -125,7 +126,10 @@ def classify_meta(raw_text_file, train_ratio, verbose_mode):
     from sklearn import metrics
     if verbose_mode: print(metrics.classification_report(y_test, y_pred))
     ret_report = metrics.classification_report(y_test, y_pred)
-    return ret_report
+    
+    rst = dict()
+    rst['meta MultinomialNB'] = report_parser(ret_report)
+    return rst
 
 
 if __name__ == "__main__":
