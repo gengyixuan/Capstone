@@ -12,7 +12,7 @@ def data_model_combine(train_p, verbose_mode):
     word_dict = {}
 
     # input
-    word_embedding_file = "word_embeddings/wiki-news-300d-1M-subword.vec"
+    word_embedding_file = "word_embeddings/wordvec_d300.txt"
     word_subset_file = "word_embeddings/vector_subset.txt"
     label_path = "word_embeddings/label_mapping.txt"
 

@@ -1,13 +1,22 @@
+from pprint import pprint
 
-def print_metrics(rst, metrics_path):
-    with open(metrics_path, "w+") as f_metrics:
-        f_metrics.write("Model, Accuracy, Recall, F1\n")
-        for model in rst:
-            f_metrics.write("%s, %.4f, %.4f, %.4f\n" %
-                            (model,
-                             rst[model][0],
-                             rst[model][1],
-                             rst[model][2]))
+
+def save_metrics(rst, metrics_path, metric_list, data_model_list, classifier_list):
+    pprint(rst)
+    for metric in metric_list:
+        metrics_fullpath = "%s/%s.csv" % (metrics_path, metric)
+        with open(metrics_fullpath, "w") as f_metrics:
+            f_metrics.write("Data Model / Classifier")
+            for classifier in classifier_list:
+                f_metrics.write(", %s" % classifier)
+            f_metrics.write("\n")
+
+            for data_model in data_model_list:
+                f_metrics.write(data_model)
+                cur_rst = rst[data_model]
+                for classifier in classifier_list:
+                    f_metrics.write(", %.4f" % cur_rst[classifier][metric])
+                f_metrics.write("\n")
 
 
 def report_parser(report):
@@ -17,4 +26,6 @@ def report_parser(report):
     precision = float(res_list[2])
     recall = float(res_list[3])
     f1 = float(res_list[4])
-    return [precision, recall, f1]
+    return {"Precision": precision,
+            "Recall": recall,
+            "F1": f1}
