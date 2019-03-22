@@ -11,23 +11,29 @@ sample_dim = 0
 def data_model_combine(train_p, verbose_mode):
     word_dict = {}
 
+<<<<<<< HEAD
     # input
     word_embedding_file = "word_embeddings/wordvec_d300.txt"
     word_subset_file = "word_embeddings/vector_subset.txt"
     label_path = "word_embeddings/label_mapping.txt"
+=======
+    # input from embedding files
+    word_embedding_file = "word_embeddings/glove.6B.300d.txt"
+>>>>>>> 19cfd46cb3a5e083dfab6449e02b8aee5941748c
 
+    # input intermediate files
     postag_info_file = "word_embeddings/pos_tag_key.txt"
     stop_words_file_path = "word_embeddings/stopwords.txt"
-    word_embedding_file_path = "word_embeddings/vector_subset.txt"
+
+    # intermediate files input from GYX
     training_set_path = "pre_processed_data/pre_train.txt"
     meta_path = "pre_processed_data/aligned_meta.txt"
 
-    # input -- training file
-    # train_p = "topicclass/topicclass_train_mid.txt"
-
-    #  output -- intermediate data
+    # output intermediate files
+    word_subset_file = "word_embeddings/vector_subset.txt"
+    label_path = "word_embeddings/label_mapping.txt"
     output_path = "pre_processed_data/pre_train.txt"
-
+    
 
     def generate_mapping(train_path, verbose_mode):
         label_list = []
@@ -48,9 +54,6 @@ def data_model_combine(train_p, verbose_mode):
 
                 oneline = str(label_list[index]) + " ||| " + str(index)
                 outfile1.writelines(oneline + '\n')
-
-        # pre_process_input_file_list = ["raw_text.txt"]
-        # pre_process_output_file_list = ["pre_processed_data/pre_processed_text.txt"]
 
         # for index in range(len(pre_process_input_file_list)):
         input_file_path = train_path
@@ -164,7 +167,7 @@ def data_model_combine(train_p, verbose_mode):
         word_vector_dict = {}
         global vector_dim
 
-        with open(word_embedding_file_path, 'r') as infile:
+        with open(word_subset_file, 'r') as infile:
             for oneline in infile.readlines():
                 one_list = oneline.strip().split()
 
@@ -201,8 +204,6 @@ def data_model_combine(train_p, verbose_mode):
         X_arr = np.array(X_list)
         Y_arr = np.array(Y_list)
 
-        # print(X_arr.shape)
-        # print(Y_arr.shape)
         return X_arr, Y_arr
 
 
@@ -269,5 +270,5 @@ if __name__ == "__main__":
     X, Y = data_model_combine(train_p, True)
     print(X.shape)
     print(Y.shape)
-    print(X)
-    print(Y)
+    # print(X)
+    # print(Y)
