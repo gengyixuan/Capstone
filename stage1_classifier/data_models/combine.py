@@ -256,7 +256,7 @@ def data_model_combine(train_p, verbose_mode):
         generate_mapping(train_p, verbose_mode)
         extract_vector_subset(verbose_mode)
 
-    concat_preprocess(train_p, True)
+    concat_preprocess(train_p, verbose_mode)
     postag_index_dict = get_postag_mapping()
     stop_set = load_stop_words()
     word_vector_dict = get_word_embedding_dict()
