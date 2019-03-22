@@ -184,4 +184,4 @@ def classify_concat(training_ratio, verbose_mode):
 
 
 if __name__ == "__main__":
-    _ = classify_concat(0.8)
+    _ = classify_concat(0.8, True)

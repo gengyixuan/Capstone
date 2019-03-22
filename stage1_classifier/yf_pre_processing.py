@@ -124,4 +124,4 @@ def concat_preprocess(train_p, verbose_mode):
 
 
 if __name__ == "__main__":
-    concat_preprocess()
+    concat_preprocess(train_p, True)
