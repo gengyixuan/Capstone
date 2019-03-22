@@ -1,5 +1,3 @@
-import sys
-import numpy as np
 import sklearn
 from sklearn import *
 from sklearn.naive_bayes import GaussianNB
