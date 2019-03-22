@@ -64,4 +64,4 @@ def model_training(X, Y, test_ratio, verbose_mode, model):
     else:
         ret = dict()
         print("no available model")
-        return dict
+        return ret
