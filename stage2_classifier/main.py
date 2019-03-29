@@ -1,14 +1,27 @@
+import json
 from utils import save_metrics
 from data_model_list import data_model_list
 from classifier import model_training
 
-metrics = ['Precision', 'Recall', 'F1']
-data_models = ['WordEmbedding', 'Metadata', 'Combined']
-classifiers = ['SVM', 'NaiveBayes', 'MLP']
-raw_text_path = "topicclass/topicclass_train_small.txt"
+
+config_path = "config.json"
+with open(config_path, 'r') as config_file:
+    config = json.load(config_file)
+
+metrics = config['metrics'].split(',')
+data_models = config['data_models'].split(',')
+classifiers = config['classifiers'].split(',')
+# metrics = ['Precision', 'Recall', 'F1']
+# data_models = ['WordEmbedding', 'Metadata', 'Combined']
+# classifiers = ['SVM', 'NaiveBayes', 'MLP']
+raw_text_path = config['raw_data_path']
+test_ratio = 1.0 - config['train_ratio']
+metrics_path = config['metrics_path']
 verbose_mode = False
-test_ratio = 0.2
-metrics_path = "output"
+if config['verbose_mode'] == "True":
+    verbose_mode = True
+# test_ratio = 0.2
+
 
 
 def iterate_through_classifiers(X, Y):

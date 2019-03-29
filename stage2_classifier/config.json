@@ -1,0 +1,9 @@
+{
+    "data_models": "WordEmbedding,Metadata,Combined",
+    "classifiers": "SVM,NaiveBayes,MLP",
+    "metrics": "Precision,Recall,F1",
+    "raw_data_path": "topicclass/topicclass_train_small.txt",
+    "metrics_path": "output",
+    "train_ratio": 0.8,
+    "verbose_mode": "False"
+}
