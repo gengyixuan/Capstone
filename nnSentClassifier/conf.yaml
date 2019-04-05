@@ -1,0 +1,42 @@
+pipeline: # Pipeline section, defines pipeline's properties
+    mode: local # Running mode, local or docker, default local
+    name: sentclass_pipeline # Name of the pipeline
+    rabbitmq_host: 127.0.0.1 # RabbitMQ's host uri
+    clean_up: false # Whether the pipeline cleans up after finished running, true or false
+    use_mongodb: false # Whether to use MongoDB, true or false, default false
+    mongodb_host: 127.0.0.1 # MongoDB's host
+
+modules:
+    -   name: prepro # Name of the module
+        type: Preprocess # Type of the module
+        input_file: topicclass.json # Input file's uri
+        output_module: cnnclassifier # The following module's name
+        instances: 1 # Number of instances of this module
+
+    -   name: cnnclassifier
+        type: CNNclassifier
+        output_module: collector
+        instances: 1
+        params:
+            -   name: EMB_SIZE
+                type: int
+                start: 30
+                end: 60
+                step_size: 10
+            
+            -   name: WIN_SIZE
+                type: int
+                start: 2
+                end: 4
+                step_size: 1
+
+            -   name: IS_REGRESS
+                type: int
+                start: 0
+                end: 1
+                step_size: 1
+
+    -   name: collector
+        type: ResultCollector
+        output_file: result.jsonl
+        instances: 1

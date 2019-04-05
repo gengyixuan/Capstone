@@ -1,0 +1,1 @@
+{"network": "CNN classifier", "config": {"IS_REGRESS": 1, "WIN_SIZE": 4, "EMB_SIZE": 40}, "results": [{"iter": 0, "test err": 150.71264450357862}, {"iter": 1, "test err": 50.46645073963074}, {"iter": 2, "test err": 42.753614848051164}]}

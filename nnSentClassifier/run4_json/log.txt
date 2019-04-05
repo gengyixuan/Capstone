@@ -1,0 +1,256 @@
+I0405 10:37:46.965072 9607 module.py:224] Module collector started, awaiting for requests.
+I0405 10:37:46.969277 9609 pipeline.py:38] Loading configuration file
+I0405 10:37:46.969523 9609 pipeline.py:39] {
+    "pipeline": {
+        "mode": "local",
+        "name": "sentclass_pipeline",
+        "rabbitmq_host": "127.0.0.1",
+        "clean_up": false,
+        "use_mongodb": false,
+        "mongodb_host": "127.0.0.1"
+    },
+    "modules": [
+        {
+            "name": "prepro",
+            "type": "Preprocess",
+            "input_file": "topicclass.json",
+            "output_module": "cnnclassifier",
+            "instances": 1
+        },
+        {
+            "name": "cnnclassifier",
+            "type": "CNNclassifier",
+            "output_module": "collector",
+            "instances": 1,
+            "params": [
+                {
+                    "name": "EMB_SIZE",
+                    "type": "int",
+                    "start": 30,
+                    "end": 60,
+                    "step_size": 10
+                },
+                {
+                    "name": "WIN_SIZE",
+                    "type": "int",
+                    "start": 2,
+                    "end": 4,
+                    "step_size": 1
+                }
+            ]
+        },
+        {
+            "name": "collector",
+            "type": "ResultCollector",
+            "output_file": "result.jsonl",
+            "instances": 1
+        }
+    ]
+}
+I0405 10:37:46.969568 9608 module.py:224] Module logger started, awaiting for requests.
+I0405 10:37:46.969686 9609 pipeline.py:59] Module list: {'prepro': {'name': 'prepro', 'type': 'Preprocess', 'input_file': 'topicclass.json', 'output_module': 'cnnclassifier', 'instances': 1}, 'cnnclassifier': {'name': 'cnnclassifier', 'type': 'CNNclassifier', 'output_module': 'collector', 'instances': 1, 'params': [{'name': 'EMB_SIZE', 'type': 'int', 'start': 30, 'end': 60, 'step_size': 10}, {'name': 'WIN_SIZE', 'type': 'int', 'start': 2, 'end': 4, 'step_size': 1}]}, 'collector': {'name': 'collector', 'type': 'ResultCollector', 'output_file': 'result.jsonl', 'instances': 1}}
+I0405 10:37:46.969809 9609 pipeline.py:63] Total jobs: 25
+I0405 10:37:46.978607 9609 pipeline.py:277] Sent job 0 to module prepro
+I0405 10:37:47.097259 9605 module.py:224] Module prepro started, awaiting for requests.
+I0405 10:37:47.097259 9605 module.py:224] Module prepro started, awaiting for requests.
+I0405 10:37:47.097949 9605 module.py:108] prepro received job: 0
+I0405 10:37:47.097949 9605 module.py:108] prepro received job: 0
+I0405 10:37:47.098170 9605 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.json
+I0405 10:37:47.098170 9605 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.json
+I0405 10:37:47.099046 9605 module.py:184] Save data to file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_
+I0405 10:37:47.099046 9605 module.py:184] Save data to file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_
+I0405 10:37:47.103257 9605 module.py:137] prepro sent back job: 0
+I0405 10:37:47.103257 9605 module.py:137] prepro sent back job: 0
+I0405 10:37:47.103803 9609 pipeline.py:277] Sent job 1 to module cnnclassifier
+I0405 10:37:47.104031 9609 pipeline.py:277] Sent job 2 to module cnnclassifier
+I0405 10:37:47.104220 9609 pipeline.py:277] Sent job 3 to module cnnclassifier
+I0405 10:37:47.104400 9609 pipeline.py:277] Sent job 4 to module cnnclassifier
+I0405 10:37:47.104580 9609 pipeline.py:277] Sent job 5 to module cnnclassifier
+I0405 10:37:47.104756 9609 pipeline.py:277] Sent job 6 to module cnnclassifier
+I0405 10:37:47.104928 9609 pipeline.py:277] Sent job 7 to module cnnclassifier
+I0405 10:37:47.105100 9609 pipeline.py:277] Sent job 8 to module cnnclassifier
+I0405 10:37:47.105275 9609 pipeline.py:277] Sent job 9 to module cnnclassifier
+I0405 10:37:47.105447 9609 pipeline.py:277] Sent job 10 to module cnnclassifier
+I0405 10:37:47.105619 9609 pipeline.py:277] Sent job 11 to module cnnclassifier
+I0405 10:37:47.105793 9609 pipeline.py:277] Sent job 12 to module cnnclassifier
+I0405 10:37:47.119462 9606 module.py:224] Module cnnclassifier started, awaiting for requests.
+I0405 10:37:47.119462 9606 module.py:224] Module cnnclassifier started, awaiting for requests.
+I0405 10:37:47.120252 9606 module.py:108] cnnclassifier received job: 1
+I0405 10:37:47.120252 9606 module.py:108] cnnclassifier received job: 1
+I0405 10:37:47.120446 9606 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_
+I0405 10:37:47.120446 9606 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_
+I0405 10:37:49.636443 9606 module.py:184] Save data to file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 2, "EMB_SIZE": 30}_
+I0405 10:37:49.636443 9606 module.py:184] Save data to file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 2, "EMB_SIZE": 30}_
+I0405 10:37:49.640028 9606 module.py:137] cnnclassifier sent back job: 1
+I0405 10:37:49.640028 9606 module.py:137] cnnclassifier sent back job: 1
+I0405 10:37:49.640546 9609 pipeline.py:277] Sent job 13 to module collector
+I0405 10:37:49.640626 9606 module.py:108] cnnclassifier received job: 2
+I0405 10:37:49.640626 9606 module.py:108] cnnclassifier received job: 2
+I0405 10:37:49.640838 9606 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_
+I0405 10:37:49.640838 9606 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_
+I0405 10:37:49.641411 9607 module.py:108] collector received job: 13
+I0405 10:37:49.641602 9607 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 2, "EMB_SIZE": 30}_
+I0405 10:37:49.641829 9607 ResultCollector.py:26] Save csv to 2019-04-05_10h37m46s/result.jsonl
+I0405 10:37:49.645050 9607 module.py:137] collector sent back job: 13
+I0405 10:37:49.645427 9609 pipeline.py:225] Job 13 completed.
+I0405 10:37:49.919920 9606 module.py:184] Save data to file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 2, "EMB_SIZE": 40}_
+I0405 10:37:49.919920 9606 module.py:184] Save data to file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 2, "EMB_SIZE": 40}_
+I0405 10:37:49.923510 9606 module.py:137] cnnclassifier sent back job: 2
+I0405 10:37:49.923510 9606 module.py:137] cnnclassifier sent back job: 2
+I0405 10:37:49.924030 9609 pipeline.py:277] Sent job 14 to module collector
+I0405 10:37:49.924285 9606 module.py:108] cnnclassifier received job: 3
+I0405 10:37:49.924285 9606 module.py:108] cnnclassifier received job: 3
+I0405 10:37:49.924558 9606 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_
+I0405 10:37:49.924558 9606 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_
+I0405 10:37:49.924748 9607 module.py:108] collector received job: 14
+I0405 10:37:49.924941 9607 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 2, "EMB_SIZE": 40}_
+I0405 10:37:49.925200 9607 ResultCollector.py:26] Save csv to 2019-04-05_10h37m46s/result.jsonl
+I0405 10:37:49.928375 9607 module.py:137] collector sent back job: 14
+I0405 10:37:49.928768 9609 pipeline.py:225] Job 14 completed.
+I0405 10:37:50.198010 9606 module.py:184] Save data to file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 2, "EMB_SIZE": 50}_
+I0405 10:37:50.198010 9606 module.py:184] Save data to file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 2, "EMB_SIZE": 50}_
+I0405 10:37:50.201641 9606 module.py:137] cnnclassifier sent back job: 3
+I0405 10:37:50.201641 9606 module.py:137] cnnclassifier sent back job: 3
+I0405 10:37:50.201992 9609 pipeline.py:277] Sent job 15 to module collector
+I0405 10:37:50.202501 9606 module.py:108] cnnclassifier received job: 4
+I0405 10:37:50.202501 9606 module.py:108] cnnclassifier received job: 4
+I0405 10:37:50.202630 9607 module.py:108] collector received job: 15
+I0405 10:37:50.202749 9606 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_
+I0405 10:37:50.202794 9607 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 2, "EMB_SIZE": 50}_
+I0405 10:37:50.202749 9606 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_
+I0405 10:37:50.202983 9607 ResultCollector.py:26] Save csv to 2019-04-05_10h37m46s/result.jsonl
+I0405 10:37:50.205816 9607 module.py:137] collector sent back job: 15
+I0405 10:37:50.206096 9609 pipeline.py:225] Job 15 completed.
+I0405 10:37:50.487548 9606 module.py:184] Save data to file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 2, "EMB_SIZE": 60}_
+I0405 10:37:50.487548 9606 module.py:184] Save data to file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 2, "EMB_SIZE": 60}_
+I0405 10:37:50.491412 9606 module.py:137] cnnclassifier sent back job: 4
+I0405 10:37:50.491412 9606 module.py:137] cnnclassifier sent back job: 4
+I0405 10:37:50.491835 9609 pipeline.py:277] Sent job 16 to module collector
+I0405 10:37:50.492224 9606 module.py:108] cnnclassifier received job: 5
+I0405 10:37:50.492224 9606 module.py:108] cnnclassifier received job: 5
+I0405 10:37:50.492472 9607 module.py:108] collector received job: 16
+I0405 10:37:50.492523 9606 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_
+I0405 10:37:50.492645 9607 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 2, "EMB_SIZE": 60}_
+I0405 10:37:50.492523 9606 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_
+I0405 10:37:50.492820 9607 ResultCollector.py:26] Save csv to 2019-04-05_10h37m46s/result.jsonl
+I0405 10:37:50.495790 9607 module.py:137] collector sent back job: 16
+I0405 10:37:50.496087 9609 pipeline.py:225] Job 16 completed.
+I0405 10:37:50.775131 9606 module.py:184] Save data to file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 3, "EMB_SIZE": 30}_
+I0405 10:37:50.775131 9606 module.py:184] Save data to file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 3, "EMB_SIZE": 30}_
+I0405 10:37:50.779045 9606 module.py:137] cnnclassifier sent back job: 5
+I0405 10:37:50.779045 9606 module.py:137] cnnclassifier sent back job: 5
+I0405 10:37:50.779461 9609 pipeline.py:277] Sent job 17 to module collector
+I0405 10:37:50.779853 9606 module.py:108] cnnclassifier received job: 6
+I0405 10:37:50.779853 9606 module.py:108] cnnclassifier received job: 6
+I0405 10:37:50.780142 9606 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_
+I0405 10:37:50.780183 9607 module.py:108] collector received job: 17
+I0405 10:37:50.780142 9606 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_
+I0405 10:37:50.780363 9607 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 3, "EMB_SIZE": 30}_
+I0405 10:37:50.780563 9607 ResultCollector.py:26] Save csv to 2019-04-05_10h37m46s/result.jsonl
+I0405 10:37:50.783432 9607 module.py:137] collector sent back job: 17
+I0405 10:37:50.783782 9609 pipeline.py:225] Job 17 completed.
+I0405 10:37:51.062650 9606 module.py:184] Save data to file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 3, "EMB_SIZE": 40}_
+I0405 10:37:51.062650 9606 module.py:184] Save data to file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 3, "EMB_SIZE": 40}_
+I0405 10:37:51.066820 9606 module.py:137] cnnclassifier sent back job: 6
+I0405 10:37:51.066820 9606 module.py:137] cnnclassifier sent back job: 6
+I0405 10:37:51.067297 9609 pipeline.py:277] Sent job 18 to module collector
+I0405 10:37:51.067404 9606 module.py:108] cnnclassifier received job: 7
+I0405 10:37:51.067404 9606 module.py:108] cnnclassifier received job: 7
+I0405 10:37:51.067604 9606 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_
+I0405 10:37:51.067604 9606 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_
+I0405 10:37:51.068045 9607 module.py:108] collector received job: 18
+I0405 10:37:51.068227 9607 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 3, "EMB_SIZE": 40}_
+I0405 10:37:51.068418 9607 ResultCollector.py:26] Save csv to 2019-04-05_10h37m46s/result.jsonl
+I0405 10:37:51.071572 9607 module.py:137] collector sent back job: 18
+I0405 10:37:51.072006 9609 pipeline.py:225] Job 18 completed.
+I0405 10:37:51.351268 9606 module.py:184] Save data to file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 3, "EMB_SIZE": 50}_
+I0405 10:37:51.351268 9606 module.py:184] Save data to file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 3, "EMB_SIZE": 50}_
+I0405 10:37:51.354552 9606 module.py:137] cnnclassifier sent back job: 7
+I0405 10:37:51.354552 9606 module.py:137] cnnclassifier sent back job: 7
+I0405 10:37:51.354968 9609 pipeline.py:277] Sent job 19 to module collector
+I0405 10:37:51.355131 9606 module.py:108] cnnclassifier received job: 8
+I0405 10:37:51.355131 9606 module.py:108] cnnclassifier received job: 8
+I0405 10:37:51.355363 9606 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_
+I0405 10:37:51.355363 9606 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_
+I0405 10:37:51.355718 9607 module.py:108] collector received job: 19
+I0405 10:37:51.355910 9607 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 3, "EMB_SIZE": 50}_
+I0405 10:37:51.356096 9607 ResultCollector.py:26] Save csv to 2019-04-05_10h37m46s/result.jsonl
+I0405 10:37:51.359242 9607 module.py:137] collector sent back job: 19
+I0405 10:37:51.359536 9609 pipeline.py:225] Job 19 completed.
+I0405 10:37:51.640130 9606 module.py:184] Save data to file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 3, "EMB_SIZE": 60}_
+I0405 10:37:51.640130 9606 module.py:184] Save data to file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 3, "EMB_SIZE": 60}_
+I0405 10:37:51.673932 9606 module.py:137] cnnclassifier sent back job: 8
+I0405 10:37:51.673932 9606 module.py:137] cnnclassifier sent back job: 8
+I0405 10:37:51.674385 9609 pipeline.py:277] Sent job 20 to module collector
+I0405 10:37:51.674669 9606 module.py:108] cnnclassifier received job: 9
+I0405 10:37:51.674669 9606 module.py:108] cnnclassifier received job: 9
+I0405 10:37:51.674908 9606 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_
+I0405 10:37:51.674908 9606 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_
+I0405 10:37:51.675105 9607 module.py:108] collector received job: 20
+I0405 10:37:51.675302 9607 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 3, "EMB_SIZE": 60}_
+I0405 10:37:51.675518 9607 ResultCollector.py:26] Save csv to 2019-04-05_10h37m46s/result.jsonl
+I0405 10:37:51.678550 9607 module.py:137] collector sent back job: 20
+I0405 10:37:51.678917 9609 pipeline.py:225] Job 20 completed.
+I0405 10:37:51.958257 9606 module.py:184] Save data to file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 4, "EMB_SIZE": 30}_
+I0405 10:37:51.958257 9606 module.py:184] Save data to file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 4, "EMB_SIZE": 30}_
+I0405 10:37:51.962222 9606 module.py:137] cnnclassifier sent back job: 9
+I0405 10:37:51.962222 9606 module.py:137] cnnclassifier sent back job: 9
+I0405 10:37:51.962712 9609 pipeline.py:277] Sent job 21 to module collector
+I0405 10:37:51.963016 9606 module.py:108] cnnclassifier received job: 10
+I0405 10:37:51.963016 9606 module.py:108] cnnclassifier received job: 10
+I0405 10:37:51.963278 9606 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_
+I0405 10:37:51.963278 9606 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_
+I0405 10:37:51.963418 9607 module.py:108] collector received job: 21
+I0405 10:37:51.963606 9607 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 4, "EMB_SIZE": 30}_
+I0405 10:37:51.963816 9607 ResultCollector.py:26] Save csv to 2019-04-05_10h37m46s/result.jsonl
+I0405 10:37:51.966826 9607 module.py:137] collector sent back job: 21
+I0405 10:37:51.967177 9609 pipeline.py:225] Job 21 completed.
+I0405 10:37:52.239145 9606 module.py:184] Save data to file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 4, "EMB_SIZE": 40}_
+I0405 10:37:52.239145 9606 module.py:184] Save data to file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 4, "EMB_SIZE": 40}_
+I0405 10:37:52.242954 9606 module.py:137] cnnclassifier sent back job: 10
+I0405 10:37:52.242954 9606 module.py:137] cnnclassifier sent back job: 10
+I0405 10:37:52.243412 9609 pipeline.py:277] Sent job 22 to module collector
+I0405 10:37:52.243530 9606 module.py:108] cnnclassifier received job: 11
+I0405 10:37:52.243530 9606 module.py:108] cnnclassifier received job: 11
+I0405 10:37:52.243736 9606 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_
+I0405 10:37:52.243736 9606 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_
+I0405 10:37:52.244061 9607 module.py:108] collector received job: 22
+I0405 10:37:52.244222 9607 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 4, "EMB_SIZE": 40}_
+I0405 10:37:52.244400 9607 ResultCollector.py:26] Save csv to 2019-04-05_10h37m46s/result.jsonl
+I0405 10:37:52.247552 9607 module.py:137] collector sent back job: 22
+I0405 10:37:52.247876 9609 pipeline.py:225] Job 22 completed.
+I0405 10:37:52.523281 9606 module.py:184] Save data to file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 4, "EMB_SIZE": 50}_
+I0405 10:37:52.523281 9606 module.py:184] Save data to file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 4, "EMB_SIZE": 50}_
+I0405 10:37:52.527045 9606 module.py:137] cnnclassifier sent back job: 11
+I0405 10:37:52.527045 9606 module.py:137] cnnclassifier sent back job: 11
+I0405 10:37:52.527501 9609 pipeline.py:277] Sent job 23 to module collector
+I0405 10:37:52.527828 9606 module.py:108] cnnclassifier received job: 12
+I0405 10:37:52.527828 9606 module.py:108] cnnclassifier received job: 12
+I0405 10:37:52.528130 9606 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_
+I0405 10:37:52.528117 9607 module.py:108] collector received job: 23
+I0405 10:37:52.528130 9606 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_
+I0405 10:37:52.528278 9607 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 4, "EMB_SIZE": 50}_
+I0405 10:37:52.528462 9607 ResultCollector.py:26] Save csv to 2019-04-05_10h37m46s/result.jsonl
+I0405 10:37:52.531315 9607 module.py:137] collector sent back job: 23
+I0405 10:37:52.531666 9609 pipeline.py:225] Job 23 completed.
+I0405 10:37:52.807418 9606 module.py:184] Save data to file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 4, "EMB_SIZE": 60}_
+I0405 10:37:52.807418 9606 module.py:184] Save data to file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 4, "EMB_SIZE": 60}_
+I0405 10:37:52.811093 9606 module.py:137] cnnclassifier sent back job: 12
+I0405 10:37:52.811093 9606 module.py:137] cnnclassifier sent back job: 12
+I0405 10:37:52.811507 9609 pipeline.py:277] Sent job 24 to module collector
+I0405 10:37:52.812171 9607 module.py:108] collector received job: 24
+I0405 10:37:52.812330 9607 module.py:165] Load data from file 2019-04-05_10h37m46s/topicclass.jsonprepro_{}_cnnclassifier_{"WIN_SIZE": 4, "EMB_SIZE": 60}_
+I0405 10:37:52.812510 9607 ResultCollector.py:26] Save csv to 2019-04-05_10h37m46s/result.jsonl
+I0405 10:37:52.815517 9607 module.py:137] collector sent back job: 24
+I0405 10:37:52.815839 9609 pipeline.py:225] Job 24 completed.
+I0405 10:37:52.816114 9609 pipeline.py:297] Sent command shutdown to module prepro, -1
+I0405 10:37:52.816303 9609 pipeline.py:297] Sent command shutdown to module cnnclassifier, -1
+I0405 10:37:52.816511 9609 pipeline.py:297] Sent command shutdown to module collector, -1
+W0405 10:37:52.816492 9605 module.py:143] Module 1 prepro received command shutdown
+W0405 10:37:52.816492 9605 module.py:143] Module 1 prepro received command shutdown
+I0405 10:37:52.816713 9609 pipeline.py:297] Sent command shutdown to module logger, -1
+W0405 10:37:52.816675 9606 module.py:143] Module 2 cnnclassifier received command shutdown
+W0405 10:37:52.816834 9609 pipeline.py:248] All jobs are completed, shutting down the pipeline
+W0405 10:37:52.816821 9607 module.py:143] Module 3 collector received command shutdown
+W0405 10:37:52.816675 9606 module.py:143] Module 2 cnnclassifier received command shutdown
+I0405 10:37:52.865630 9608 logger.py:42] Module 4 logger received command shutdown
