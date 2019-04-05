@@ -17,11 +17,7 @@ classifiers = config['classifiers'].split(',')
 raw_text_path = config['raw_data_path']
 test_ratio = 1.0 - config['train_ratio']
 metrics_path = config['metrics_path']
-verbose_mode = False
-if config['verbose_mode'] == "True":
-    verbose_mode = True
-# test_ratio = 0.2
-
+verbose_mode = config['verbose_mode']
 
 
 def iterate_through_classifiers(X, Y):
