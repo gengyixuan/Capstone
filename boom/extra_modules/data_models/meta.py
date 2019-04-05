@@ -29,6 +29,8 @@ import numpy as np
 # nltk.download()
 
 # nltk get tokens of the input sentence and get POS tag of each token
+
+
 def data_model_meta(train_p, verbose_mode):
     def get_pos_tags(sentence):
         tokens = word_tokenize(sentence)
