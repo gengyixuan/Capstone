@@ -38,6 +38,12 @@ modules:
                     - SVM
                     - NaiveBayes
                     - MLP
+                    - DT
+                    - KNN
+                    - RandomForest
+                    - Adaboost
+                    - GradientBoost
+
 
     -   name: writer
         type: CSVWriter
