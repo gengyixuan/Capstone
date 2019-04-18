@@ -29,7 +29,7 @@ modules:
             -   name: test_ratio
                 type: float
                 start: 0.1
-                end: 0.3
+                end: 0.1
                 step_size: 0.1
 
             -   name: model_snapshot
@@ -53,7 +53,7 @@ modules:
 
     -   name: writer
         type: SortedCSVWriter
-        output_file: ../results.csv
+        output_file: ../results-classifier.csv
         instances: 1
         params:
             - name: key_column

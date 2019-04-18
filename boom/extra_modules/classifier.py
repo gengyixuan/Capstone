@@ -1,13 +1,11 @@
-import sklearn
 from sklearn import *
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import train_test_split
-from utils import report_parser
 from sklearn import metrics
 from sklearn import tree, svm, naive_bayes,neighbors
 from sklearn.ensemble import BaggingClassifier, AdaBoostClassifier, RandomForestClassifier, GradientBoostingClassifier
-
+from utils import report_parser
 
 max_iter = 50
 

@@ -1,7 +1,7 @@
 import glog as log
 from boom.modules import Module
 from boom.log import set_logger
-from data_model_list import data_model_list
+from extra_modules.data_model_list import data_model_list
 
 
 class DataModel(Module):
@@ -16,7 +16,7 @@ class DataModel(Module):
 
         log.debug(job)
         verbose_mode = True
-        raw_text_path = "topicclass/topicclass_train_small.txt"
+        raw_text_path = data['path']
         target_data_model = data_model_list[job.params['data_model']]
         X, Y = target_data_model(raw_text_path, verbose_mode)
         data['X'] = X.tolist()

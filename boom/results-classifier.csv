@@ -1,0 +1,25 @@
+configuration,Recall,Precision,F1
+"data.jsonpreprocessing_{""data_model"": ""WordEmbedding""}_clf_{""test_ratio"": 0.1, ""classifier"": ""MLP""}_",0.8,0.88,0.82
+"data.jsonpreprocessing_{""data_model"": ""WordEmbedding""}_clf_{""test_ratio"": 0.1, ""classifier"": ""KNN""}_",0.8,0.86,0.8
+"data.jsonpreprocessing_{""data_model"": ""Combined""}_clf_{""test_ratio"": 0.1, ""classifier"": ""MLP""}_",0.8,0.83,0.8
+"data.jsonpreprocessing_{""data_model"": ""WordEmbedding""}_clf_{""test_ratio"": 0.1, ""classifier"": ""SVM""}_",0.78,0.78,0.77
+"data.jsonpreprocessing_{""data_model"": ""Combined""}_clf_{""test_ratio"": 0.1, ""classifier"": ""SVM""}_",0.77,0.78,0.76
+"data.jsonpreprocessing_{""data_model"": ""Combined""}_clf_{""test_ratio"": 0.1, ""classifier"": ""NaiveBayes""}_",0.68,0.75,0.69
+"data.jsonpreprocessing_{""data_model"": ""WordEmbedding""}_clf_{""test_ratio"": 0.1, ""classifier"": ""NaiveBayes""}_",0.71,0.71,0.68
+"data.jsonpreprocessing_{""data_model"": ""WordEmbedding""}_clf_{""test_ratio"": 0.1, ""classifier"": ""GradientBoost""}_",0.66,0.7,0.66
+"data.jsonpreprocessing_{""data_model"": ""Combined""}_clf_{""test_ratio"": 0.1, ""classifier"": ""KNN""}_",0.68,0.71,0.66
+"data.jsonpreprocessing_{""data_model"": ""Combined""}_clf_{""test_ratio"": 0.1, ""classifier"": ""GradientBoost""}_",0.66,0.61,0.63
+"data.jsonpreprocessing_{""data_model"": ""WordEmbedding""}_clf_{""test_ratio"": 0.1, ""classifier"": ""RandomForest""}_",0.51,0.52,0.49
+"data.jsonpreprocessing_{""data_model"": ""Combined""}_clf_{""test_ratio"": 0.1, ""classifier"": ""DT""}_",0.48,0.47,0.46
+"data.jsonpreprocessing_{""data_model"": ""WordEmbedding""}_clf_{""test_ratio"": 0.1, ""classifier"": ""DT""}_",0.45,0.49,0.45
+"data.jsonpreprocessing_{""data_model"": ""Combined""}_clf_{""test_ratio"": 0.1, ""classifier"": ""RandomForest""}_",0.48,0.39,0.41
+"data.jsonpreprocessing_{""data_model"": ""Metadata""}_clf_{""test_ratio"": 0.1, ""classifier"": ""MLP""}_",0.25,0.27,0.26
+"data.jsonpreprocessing_{""data_model"": ""Combined""}_clf_{""test_ratio"": 0.1, ""classifier"": ""Adaboost""}_",0.31,0.25,0.24
+"data.jsonpreprocessing_{""data_model"": ""WordEmbedding""}_clf_{""test_ratio"": 0.1, ""classifier"": ""Adaboost""}_",0.32,0.16,0.2
+"data.jsonpreprocessing_{""data_model"": ""Metadata""}_clf_{""test_ratio"": 0.1, ""classifier"": ""DT""}_",0.22,0.18,0.19
+"data.jsonpreprocessing_{""data_model"": ""Metadata""}_clf_{""test_ratio"": 0.1, ""classifier"": ""NaiveBayes""}_",0.17,0.22,0.18
+"data.jsonpreprocessing_{""data_model"": ""Metadata""}_clf_{""test_ratio"": 0.1, ""classifier"": ""GradientBoost""}_",0.18,0.23,0.18
+"data.jsonpreprocessing_{""data_model"": ""Metadata""}_clf_{""test_ratio"": 0.1, ""classifier"": ""SVM""}_",0.12,0.21,0.13
+"data.jsonpreprocessing_{""data_model"": ""Metadata""}_clf_{""test_ratio"": 0.1, ""classifier"": ""KNN""}_",0.14,0.17,0.13
+"data.jsonpreprocessing_{""data_model"": ""Metadata""}_clf_{""test_ratio"": 0.1, ""classifier"": ""RandomForest""}_",0.14,0.14,0.13
+"data.jsonpreprocessing_{""data_model"": ""Metadata""}_clf_{""test_ratio"": 0.1, ""classifier"": ""Adaboost""}_",0.09,0.05,0.05

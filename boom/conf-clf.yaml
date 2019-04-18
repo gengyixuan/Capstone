@@ -1,0 +1,56 @@
+pipeline: # Pipeline section, defines pipeline's properties
+    mode: local # Running mode, local or docker, default local
+    name: text_classifier # Name of the pipeline
+    rabbitmq_host: 127.0.0.1 # RabbitMQ's host uri
+    clean_up: false # Whether the pipeline cleans up after finished running, true or false
+    use_mongodb: false # Whether to use MongoDB, true or false, default false
+    mongodb_host: 127.0.0.1 # MongoDB's host
+
+modules:
+    -   name: preprocessing # Name of the module
+        type: DataModel # Type of the module
+        input_file: data.json
+        output_module: clf  # The following module's name
+        instances: 1 # Number of instances of this module
+        processes: 1
+        params:
+            -   name: data_model
+                type: collection # Type of the param, int, float or collection
+                values: # Possible vaules for collection param
+                    - WordEmbedding
+                    - Metadata
+                    - Combined
+
+    -   name: clf
+        type: Clf
+        output_module: writer
+        instances: 1
+        params:
+            -   name: test_ratio
+                type: float
+                start: 0.1
+                end: 0.1
+                step_size: 0.1
+
+            -   name: classifier
+                type: collection # Type of the param, int, float or collection
+                values: # Possible vaules for collection param
+                    - SVM
+                    - NaiveBayes
+                    - MLP
+                    - DT
+                    - KNN
+                    - RandomForest
+                    - Adaboost
+                    - GradientBoost
+
+
+    -   name: writer
+        type: SortedCSVWriter
+        output_file: ../results-classifier.csv
+        instances: 1
+        params:
+            - name: key_column
+              type: collection
+              values:
+                  - F1

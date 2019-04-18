@@ -1,0 +1,9 @@
+configuration,MeanSquaredError
+"data-ranking.jsonpreprocessing_{""data_model"": ""Ranking""}_reg_{""test_ratio"": 0.1, ""regressor"": ""SVM""}_",3.15954721531104
+"data-ranking.jsonpreprocessing_{""data_model"": ""Ranking""}_reg_{""test_ratio"": 0.1, ""regressor"": ""MLP""}_",1.6850583733466638
+"data-ranking.jsonpreprocessing_{""data_model"": ""Ranking""}_reg_{""test_ratio"": 0.1, ""regressor"": ""DT""}_",1.42
+"data-ranking.jsonpreprocessing_{""data_model"": ""Ranking""}_reg_{""test_ratio"": 0.1, ""regressor"": ""KNN""}_",1.3092
+"data-ranking.jsonpreprocessing_{""data_model"": ""Ranking""}_reg_{""test_ratio"": 0.1, ""regressor"": ""RandomForest""}_",1.1983
+"data-ranking.jsonpreprocessing_{""data_model"": ""Ranking""}_reg_{""test_ratio"": 0.1, ""regressor"": ""NaiveBayes""}_",1.0656222533775201
+"data-ranking.jsonpreprocessing_{""data_model"": ""Ranking""}_reg_{""test_ratio"": 0.1, ""regressor"": ""GradientBoost""}_",1.0301450262386893
+"data-ranking.jsonpreprocessing_{""data_model"": ""Ranking""}_reg_{""test_ratio"": 0.1, ""regressor"": ""Adaboost""}_",1.0072511881617037
