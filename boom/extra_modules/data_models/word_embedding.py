@@ -1,9 +1,11 @@
 import numpy as np
+import os
 
 
 def data_model_word_embedding(train_p, verbose_mode):
     shuffle = False
     dimension = 300
+    print(os.getcwd())
     word2vec_path = "word_embeddings/wordvec_d%d.txt" % dimension
 
     # Read pre-trained list

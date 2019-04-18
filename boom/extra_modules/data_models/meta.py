@@ -17,6 +17,9 @@ from nltk import word_tokenize
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import train_test_split
 import numpy as np
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
 # import ssl
 
 # try:

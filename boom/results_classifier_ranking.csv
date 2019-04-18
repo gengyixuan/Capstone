@@ -1,0 +1,9 @@
+configuration,Recall,Precision,F1
+"data-ranking.jsonpreprocessing_{""data_model"": ""Ranking""}_clf_{""test_ratio"": 0.1, ""classifier"": ""GradientBoost""}_",0.57,0.55,0.56
+"data-ranking.jsonpreprocessing_{""data_model"": ""Ranking""}_clf_{""test_ratio"": 0.1, ""classifier"": ""Adaboost""}_",0.52,0.5,0.51
+"data-ranking.jsonpreprocessing_{""data_model"": ""Ranking""}_clf_{""test_ratio"": 0.1, ""classifier"": ""RandomForest""}_",0.53,0.47,0.5
+"data-ranking.jsonpreprocessing_{""data_model"": ""Ranking""}_clf_{""test_ratio"": 0.1, ""classifier"": ""DT""}_",0.46,0.45,0.45
+"data-ranking.jsonpreprocessing_{""data_model"": ""Ranking""}_clf_{""test_ratio"": 0.1, ""classifier"": ""NaiveBayes""}_",0.32,0.52,0.39
+"data-ranking.jsonpreprocessing_{""data_model"": ""Ranking""}_clf_{""test_ratio"": 0.1, ""classifier"": ""KNN""}_",0.43,0.34,0.38
+"data-ranking.jsonpreprocessing_{""data_model"": ""Ranking""}_clf_{""test_ratio"": 0.1, ""classifier"": ""MLP""}_",0.48,0.23,0.31
+"data-ranking.jsonpreprocessing_{""data_model"": ""Ranking""}_clf_{""test_ratio"": 0.1, ""classifier"": ""SVM""}_",0.15,0.37,0.19
