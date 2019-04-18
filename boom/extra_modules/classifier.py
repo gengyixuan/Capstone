@@ -18,7 +18,9 @@ def get_model_performance(clf, X_test, y_test):
     return report_parser(res)
 
 
-def model_training(X, Y, test_ratio, verbose_mode, model):
+def model_training(X, Y, test_ratio, verbose_mode, model, model_snapshot):
+    model_snapshot_fname = "model_ss_" + model + '.pkl'
+
     X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=test_ratio)
 
     if model == "MLP":

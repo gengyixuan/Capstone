@@ -18,9 +18,12 @@ class Clf(Module):
         verbose_mode = True
         X = data['X']
         Y = data['Y']
+
         test_ratio = job.params['test_ratio']
         classifier = job.params['classifier']
-        report = model_training(X, Y, test_ratio, verbose_mode, classifier)
+        model_snapshot = job.params['model_snapshot']
+
+        report = model_training(X, Y, test_ratio, verbose_mode, classifier, model_snapshot)
         log.debug(data)
 
         return report
