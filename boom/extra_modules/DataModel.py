@@ -21,6 +21,7 @@ class DataModel(Module):
         X, Y = target_data_model(raw_text_path, verbose_mode)
         data['X'] = X.tolist()
         data['Y'] = Y.tolist()
+        data['type'] = job.params['data_model']
         log.debug(data)
 
         return data

@@ -35,7 +35,6 @@ modules:
             -   name: model_snapshot
                 type: collection
                 values:
-                    - load
                     - save
 
             -   name: classifier
