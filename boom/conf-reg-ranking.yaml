@@ -29,6 +29,11 @@ modules:
                 start: 0.1
                 end: 0.1
                 step_size: 0.1
+            
+            -   name: model_snapshot
+                type: collection
+                values:
+                    - save
 
             -   name: regressor
                 type: collection # Type of the param, int, float or collection

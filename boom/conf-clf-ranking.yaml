@@ -30,6 +30,11 @@ modules:
                 end: 0.1
                 step_size: 0.1
 
+            -   name: model_snapshot
+                type: collection
+                values:
+                    - save
+
             -   name: classifier
                 type: collection # Type of the param, int, float or collection
                 values: # Possible vaules for collection param

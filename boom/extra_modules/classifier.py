@@ -1,4 +1,5 @@
 import pickle
+import os
 from sklearn import *
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neural_network import MLPClassifier
