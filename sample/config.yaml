@@ -1,0 +1,54 @@
+pipeline: # Pipeline section, defines pipeline's properties
+    mode: local # Running mode, local or docker, default local
+    name: text_classifier # Name of the pipeline
+
+modules:
+    -   node: input1 # Name of the module
+        script: src/script1.py
+        dependencies:
+            -   data1
+            -   data2
+        params:
+            -   name: data_model
+                type: collection # Type of the param, int, float or collection
+                values: # Possible vaules for collection param
+                    - WordEmbedding
+                    - Metadata
+                    - Combined
+
+    -   node: input2 # Name of the module
+        script: src/script2.py
+        dependencies:
+            -   data1
+            -   data2
+        params:
+            -   name: data_model
+                type: collection # Type of the param, int, float or collection
+                values: # Possible vaules for collection param
+                    - WordEmbedding
+                    - Metadata
+                    - Combined
+
+    -   node: process
+        script: src/script3.py
+        input_nodes: 
+            -   input1
+            -   input2
+        params:
+            -   name: test_ratio
+                type: float
+                start: 0.2
+                end: 0.4
+                step_size: 0.2
+
+            -   name: classifier
+                type: collection # Type of the param, int, float or collection
+                values: # Possible vaules for collection param
+                    - SVM
+                    - NaiveBayes
+                    - MLP
+                    - DT
+                    - KNN
+                    - RandomForest
+                    - Adaboost
+                    - GradientBoost

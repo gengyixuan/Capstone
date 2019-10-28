@@ -1,0 +1,16 @@
+src/script1.py:
+  deps:
+    data1: '1572114450.4882166'
+    data2: '1572111109.0572197'
+  script_lastmtime: '1572065042.4862468'
+  version: 0
+src/script2.py:
+  deps:
+    data1: '1572114450.4882166'
+    data2: '1572111109.0572197'
+  script_lastmtime: '1572114464.412172'
+  version: 0
+src/script3.py:
+  deps: {}
+  script_lastmtime: '1572062352.979784'
+  version: 0
