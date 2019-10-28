@@ -3,43 +3,54 @@ pipeline: # Pipeline section, defines pipeline's properties
     name: text_classifier # Name of the pipeline
 
 modules:
-    -   node: input1 # Name of the module
-        script: src/script1.py
+    -   node: reader # Name of the module
+        script: src/reader.py
         dependencies:
             -   data1
             -   data2
         params:
-            -   name: data_model
-                type: collection # Type of the param, int, float or collection
-                values: # Possible vaules for collection param
-                    - WordEmbedding
-                    - Metadata
-                    - Combined
-
-    -   node: input2 # Name of the module
-        script: src/script2.py
-        dependencies:
-            -   data1
-            -   data2
-        params:
-            -   name: data_model
-                type: collection # Type of the param, int, float or collection
-                values: # Possible vaules for collection param
-                    - WordEmbedding
-                    - Metadata
-                    - Combined
-
-    -   node: process
-        script: src/script3.py
-        input_nodes: 
-            -   input1
-            -   input2
-        params:
-            -   name: test_ratio
-                type: float
+            -   name: mult
+                type: float # Type of the param, int, float or collection
                 start: 0.2
-                end: 0.4
+                end: 0.6
                 step_size: 0.2
+            -   name: add
+                type: float # Type of the param, int, float or collection
+                start: 1.0
+                end: 2.0
+                step_size: 0.5
+
+    -   node: append1 # Name of the module
+        script: src/append1.py
+        params:
+            -   name: num
+                type: collection # Type of the param, int, float or collection
+                values: # Possible vaules for collection param
+                    - 1000
+                    - 2000
+                    - 5000
+
+    -   node: append2 # Name of the module
+        script: src/append2.py
+        params:
+            -   name: num
+                type: collection # Type of the param, int, float or collection
+                values: # Possible vaules for collection param
+                    - -1000
+                    - -2000
+                    - -5000
+
+    -   node: writer
+        script: src/writer.py
+        input_nodes: 
+            -   append1
+            -   append2
+        params:
+            -   name: subtract
+                type: float
+                start: -1.0
+                end: 0.0
+                step_size: 0.3
 
             -   name: classifier
                 type: collection # Type of the param, int, float or collection
