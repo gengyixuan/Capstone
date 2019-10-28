@@ -1,111 +1,158 @@
 import copy
-
-# NodeName: string
-# ScriptVersion: int, start from 0
-# HyperParameter: dict, key: parameter, val: value
-
-class Node:
-    def __init__(self, NodeName, HyperParameter):
-        self.NodeName = NodeName
-        self.ScriptVersion = 0
-        self.InputNodes = []
-        # dict: key: ScriptVersion, val: HyperParameter
-        self.HyperParameter = {ScriptVersion: HyperParameter}
-        # dict, key: ScriptVersion, val: list of HyperParameter run before
-        self.run = {0: []}  
-    
-    # AddNodeList: list of Node variable as the input nodes
-    # This func should only be called during graph init
-    def AddInputNode(self, AddNodeList):
-        for AddNode in AddNodeList:
-            self.InputNodes.append(AddNode)
-
-    def UpdateScriptVersion(self):
-        self.ScriptVersion += 1
-        self.run = False
-        return self.ScriptVersion
-
-    def GetScriptVersion(self):
-        return self.ScriptVersion
-
-    def GetInputNodes(self):
-        return self.InputNodes
-    
-    def GetHyperParameter(self):
-        return self.HyperParameter
-
-    # NewHyperParameter: key: parameter to be updated, val: new value
-    def UpdateHyperParameter(self, ScriptVersion, NewHyperParameter):
-        if ScriptVersion not in self.HyperParameter:
-            self.HyperParameter[ScriptVersion] = NewHyperParameter
-        else:
-            for key in NewHyperParameter:
-                if key in self.HyperParameter[ScriptVersion]:
-                    self.HyperParameter[ScriptVersion][key] = NewHyperParameter[key]
-
-    # run this node under current configuration
-    def RunNode(self, ScriptVersion, HyperParameter):
-        self.run[ScriptVersion].append(copy.deepcopy(HyperParameter))
+from utils import Node
 
 
-# visit computational graph
-# NodeName: Node
-# CurPath: set()
-# Paths: list of set
-def dfs_visit(NodeName, CurPath, Paths):
-    if len(NodeName.InputNodes) == 0:
-        Paths.append(copy.deepcopy(CurPath))
-        return
-    
-    for InputNode in NodeName.InputNodes:
-        NewPath = copy.deepcopy(CurPath)
-        NewPath.add(InputNode)
-        dfs_visit(InputNode, NewPath, Paths)
+class LogManager:
+    def __init__(self):
+        self.separator = "\t#\t"
+        
+        # Key: <str> NodeName + "\t#\t" + FileSetVersion
+        # val: [(InputNodeName, FileSetVersion)]
+        self.reverse_log = {}
 
-    return
+        # key: <str> NodeName + "\t#\t" + FileSetVersion
+        # val: <dict> hyper_parameter
+        self.fileset_hp = {}
 
-# Description: give the result based on the following two conditions:
+        # key: <str> Node_name + "\t#\t" + ScriptVersion + "\t#\t" + Inputs
+        # value: (hyper_parameter(dict), OutputFileSetVersion)
+        self.log = {}
 
-# 1. Check if the same experiment has been run before 
-# (matching all ScriptName, ScriptVersion, [(InputData, InputDataVersion)] and HyperParameter). 
-# If yes, return false
+        
+    def convert_inputs_to_str(self, inputs):
+        convert_str = ""
+        for one_tuple in sorted(inputs):
+            input_node_name = one_tuple[0]
+            fileset_version = one_tuple[1]
+            convert_str += str(input_node_name) + self.separator + str(fileset_version) + self.separator
+        convert_str = convert_str[0: len(convert_str)-len(self.separator)]
+        return convert_str
 
-# 2. Check all the ancestors of all the input data. Check if there is any parameter mismatch. 
-# If yes, return false.
-def ExperimentRun(NodeName, ScriptVersion, HyperParameter, Inputs):
-    if ScriptVersion in NodeName.run:
-        all_match = True
 
-        for one_hp in NodeName.run[ScriptVersion]:
-            for key in HyperParameter:
-                if key not in one_hp or one_hp[key] != HyperParameter[key]:
+    def generate_node_key(self, node_name, script_version, inputs):
+        return str(node_name) + self.separator + str(script_version) + self.separator + self.convert_inputs_to_str(inputs)
+
+
+    def dfs_visit(self, node_name, fileset_version, cur_path, paths):
+        tmp_key = node_name + self.separator + str(fileset_version)
+        
+        if tmp_key not in self.reverse_log:
+            paths.append(copy.deepcopy(cur_path))
+            return
+        
+        inputs = self.reverse_log[tmp_key]
+
+        for one_tuple in inputs:
+            input_node = one_tuple[0]
+            input_fs_version = one_tuple[1]
+
+            new_path = copy.deepcopy(cur_path)
+            new_path[input_node] = input_fs_version
+            # new_path.add(input_node)
+            self.dfs_visit(input_node, input_fs_version, new_path, paths)
+
+
+    def tracking_ancestors(self, inputs):
+        all_paths = []
+        
+        for one_tuple in inputs:
+            input_node = one_tuple[0]
+            input_fs_version = one_tuple[1]
+
+            cur_path = {input_node: input_fs_version}
+            self.dfs_visit(input_node, input_fs_version, cur_path, all_paths)
+
+        return all_paths
+
+
+    # return true if valid
+    # return false is there is invalid ancestors
+    def check_ancestors_hp(self, paths):
+        for i in range(0, len(paths)):
+            for j in range(i+1, len(paths)):
+                path1 = paths[i]
+                path2 = paths[j]
+
+                for one_node in path1:
+                    if one_node in path2:
+                        fs_version1 = path1[one_node]
+                        fs_version2 = path2[one_node]
+
+                        if fs_version1 == fs_version2:
+                            continue
+
+                        # if different file_version
+                        # check if hp has the same value
+                        hp1 = self.fileset_hp[one_node + self.separator + str(fs_version1)]
+                        hp2 = self.fileset_hp[one_node + self.separator + str(fs_version2)]
+
+                        if len(hp1) != len(hp2):
+                            return False
+
+                        for one_hp in hp1:
+                            if hp1[one_hp] != hp2[one_hp]:
+                                return False
+        
+        return True
+
+
+    def ExperimentRun(self, node_name, script_version, hyper_parameter, inputs):
+        check_log = self.generate_node_key(node_name, script_version, inputs)
+        
+        if check_log in self.log:
+            all_match = True
+            hp_dict = self.log[check_log][0]
+
+            for one_hp in hyper_parameter:
+                if one_hp not in hp_dict:
                     all_match = False
-                if not all_match:
                     break
-            if not all_match:
-                break
+
+                if hp_dict[one_hp] != hyper_parameter[one_hp]:
+                    all_match = False
+                    break
             
-        if all_match:
-            return False
+            if all_match:
+                return False
 
-    Paths = []
-    CurPath = set()
-    dfs_visit(NodeName, CurPath, Paths)
-
-    for i in range(0, len(Paths)):
-        for j in range(i+1, len(Paths)):
-            path1 = Paths[i];
-            path2 = Paths[j]
-
-            common_nodes = []
-
-            for one_node in path1:
-                if one_node in path2:
-                    common_nodes.append(one_node)
-
-            
+        all_paths = self.tracking_ancestors(inputs)
+        return self.check_ancestors_hp(all_paths)
 
 
+    def SaveOutputData(self, node_name, script_version, hyper_parameter, inputs, output_fileset_version):
+        log_key = self.generate_node_key(node_name, script_version, inputs)
+        self.log[log_key] = (hyper_parameter, output_fileset_version)
+        
+        reverse_log_key = node_name + self.separator + str(output_fileset_version)
+        self.reverse_log[reverse_log_key] = inputs
+        self.fileset_hp[reverse_log_key] = hyper_parameter
 
+
+# for testing
+if __name__ == "__main__":
+    lm = LogManager()
     
+    # inputs = [("b.py", 1), ("a.py", 2), ("c.py", 3)]
+    # # print(lm.convert_inputs_to_str(inputs))
+
+    # hp_test = {'x1': 1.2, 'x2': 0.5}
+    # lm.SaveOutputData("e.py", 2, hp_test, inputs, 2)
+
+    # for key in lm.log:
+    #     print(key)
+    #     print(lm.log[key])
+
+    lm.reverse_log["b" + lm.separator + "1"] = [("a", 1)]
+    lm.reverse_log["d" + lm.separator + "1"] = [("b", 1), ("c", 3)]
     
+    lm.reverse_log["g" + lm.separator + "2"] = [("e", 2), ("f", 1)]
+    lm.reverse_log["e" + lm.separator + "2"] = [("h", 1)]
+    lm.reverse_log["f" + lm.separator + "1"] = [("h", 1)]
+
+    lm.reverse_log["g" + lm.separator + "1"] = [("e", 1), ("f", 2)]
+    lm.reverse_log["e" + lm.separator + "1"] = [("h", 2)]
+    lm.reverse_log["f" + lm.separator + "2"] = [("h", 2)]
+
+    inputs = [("d", 1), ("g", 1)]
+
+    print(lm.tracking_ancestors(inputs))
