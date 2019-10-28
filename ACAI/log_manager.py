@@ -1,22 +1,46 @@
 import copy
+import pickle
 from utils import Node
+
+reverse_log_path = "ACAI/metadata/reverse_log_path.pkl"
+fileset_hp_path = "ACAI/metadata/fileset_hp_path.pkl"
+log_path = "ACAI/metadata/log_path.pkl"
 
 
 class LogManager:
-    def __init__(self):
+    def __init__(self, reverse_log_path, fileset_hp_path, log_path):
         self.separator = "\t#\t"
         
         # Key: <str> NodeName + "\t#\t" + FileSetVersion
         # val: [(InputNodeName, FileSetVersion)]
         self.reverse_log = {}
+        try:
+            with open(reverse_log_path, 'rb') as input_file:
+                self.reverse_log = pickle.load(input_file)
+        except:
+            pass
 
         # key: <str> NodeName + "\t#\t" + FileSetVersion
         # val: <dict> hyper_parameter
         self.fileset_hp = {}
+        try:
+            with open(fileset_hp_path, 'rb') as input_file:
+                self.fileset_hp = pickle.load(input_file)
+        except:
+            pass
 
         # key: <str> Node_name + "\t#\t" + ScriptVersion + "\t#\t" + Inputs
         # value: (hyper_parameter(dict), OutputFileSetVersion)
         self.log = {}
+        try:
+            with open(log_path, 'rb') as input_file:
+                self.log = pickle.load(input_file)
+        except:
+            pass
+
+        self.reverse_log_path = reverse_log_path
+        self.fileset_hp_path = fileset_hp_path
+        self.log_path = log_path
 
         
     def convert_inputs_to_str(self, inputs):
@@ -96,7 +120,7 @@ class LogManager:
         return True
 
 
-    def ExperimentRun(self, node_name, script_version, hyper_parameter, inputs):
+    def experiment_run(self, node_name, script_version, hyper_parameter, inputs):
         check_log = self.generate_node_key(node_name, script_version, inputs)
         
         if check_log in self.log:
@@ -119,7 +143,7 @@ class LogManager:
         return self.check_ancestors_hp(all_paths)
 
 
-    def SaveOutputData(self, node_name, script_version, hyper_parameter, inputs, output_fileset_version):
+    def save_output_data(self, node_name, script_version, hyper_parameter, inputs, output_fileset_version):
         log_key = self.generate_node_key(node_name, script_version, inputs)
         self.log[log_key] = (hyper_parameter, output_fileset_version)
         
@@ -127,16 +151,25 @@ class LogManager:
         self.reverse_log[reverse_log_key] = inputs
         self.fileset_hp[reverse_log_key] = hyper_parameter
 
+        with open(self.reverse_log_path, 'wb') as outfile:
+            pickle.dump(self.reverse_log, outfile, protocol=pickle.HIGHEST_PROTOCOL)
+
+        with open(self.fileset_hp_path, 'wb') as outfile:
+            pickle.dump(self.fileset_hp, outfile, protocol=pickle.HIGHEST_PROTOCOL)
+
+        with open(self.log_path, 'wb') as outfile:
+            pickle.dump(self.log, outfile, protocol=pickle.HIGHEST_PROTOCOL)
+
 
 # for testing
 if __name__ == "__main__":
-    lm = LogManager()
+    lm = LogManager(reverse_log_path, fileset_hp_path, log_path)
     
-    # inputs = [("b.py", 1), ("a.py", 2), ("c.py", 3)]
+    inputs = [("b.py", 1), ("a.py", 2), ("c.py", 3)]
     # # print(lm.convert_inputs_to_str(inputs))
 
-    # hp_test = {'x1': 1.2, 'x2': 0.5}
-    # lm.SaveOutputData("e.py", 2, hp_test, inputs, 2)
+    hp_test = {'x1': 1.2, 'x2': 0.5}
+    # lm.save_output_data("e.py", 2, hp_test, inputs, 2)
 
     # for key in lm.log:
     #     print(key)
@@ -150,9 +183,11 @@ if __name__ == "__main__":
     lm.reverse_log["f" + lm.separator + "1"] = [("h", 1)]
 
     lm.reverse_log["g" + lm.separator + "1"] = [("e", 1), ("f", 2)]
-    lm.reverse_log["e" + lm.separator + "1"] = [("h", 2)]
+    lm.reverse_log["e" + lm.separator + "1"] = [("h", 1)]
     lm.reverse_log["f" + lm.separator + "2"] = [("h", 2)]
 
     inputs = [("d", 1), ("g", 1)]
 
     print(lm.tracking_ancestors(inputs))
+
+    lm.save_output_data("a.py", 1, hp_test, inputs, 1)
