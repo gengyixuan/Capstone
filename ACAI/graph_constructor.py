@@ -1,24 +1,25 @@
 import yaml
 import io
 import os
+from utils import *
 
-class ComputeNode:
-    def __init__(self, node_name="", script_name="", script_version=0, 
-                 input_nodes=[], output_nodes=[], hyperparams={}):
-        self.NodeName = node_name
-        self.ScriptName = script_name
-        self.ScriptVersion = script_version
-        self.InputNodes = input_nodes
-        self.OutputNodes = output_nodes
-        self.HyperParameter = hyperparams
+# class ComputeNode:
+#     def __init__(self, node_name="", script_name="", script_version=0, 
+#                  input_nodes=[], output_nodes=[], hyperparams={}):
+#         self.NodeName = node_name
+#         self.ScriptName = script_name
+#         self.ScriptVersion = script_version
+#         self.InputNodes = input_nodes
+#         self.OutputNodes = output_nodes
+#         self.HyperParameter = hyperparams
     
-    def toStr(self):
-        template = "name: {}\nscript: {}\nversion: {}\ninput: {}\noutput: {}\nhparams: {}"
-        in_node_names = [node.NodeName for node in self.InputNodes]
-        out_node_names = [node.NodeName for node in self.OutputNodes]
-        string = template.format(self.NodeName, self.ScriptName, self.ScriptVersion, 
-                                 ",".join(in_node_names), ",".join(out_node_names), str(self.HyperParameter))
-        return string
+#     def toStr(self):
+#         template = "name: {}\nscript: {}\nversion: {}\ninput: {}\noutput: {}\nhparams: {}"
+#         in_node_names = [node.NodeName for node in self.InputNodes]
+#         out_node_names = [node.NodeName for node in self.OutputNodes]
+#         string = template.format(self.NodeName, self.ScriptName, self.ScriptVersion, 
+#                                  ",".join(in_node_names), ",".join(out_node_names), str(self.HyperParameter))
+#         return string
 
 # GraphConstructor:
 # parse config.yaml
@@ -99,12 +100,12 @@ class GraphConstructor(object):
             # continue building the new node
             hyperparams = module['params']
             input_nodes = [] if 'input_nodes' not in module else module['input_nodes']
-            newnode = ComputeNode(node_name=node_name,
-                                  script_name=script_name, 
-                                  script_version=script_version, 
-                                  input_nodes=input_nodes,
-                                  output_nodes=[],
-                                  hyperparams=hyperparams)
+            newnode = Node(node_name=node_name,
+                          script_name=script_name, 
+                          script_version=script_version, 
+                          input_nodes=input_nodes,
+                          output_nodes=[],
+                          hyperparams=hyperparams)
             compute_nodes[node_name] = newnode
 
         # save new version map to disk
@@ -115,12 +116,12 @@ class GraphConstructor(object):
         graph = []
         for node_name in compute_nodes:
             node = compute_nodes[node_name]
-            input_node_names = node.InputNodes
-            node.InputNodes = []
+            input_node_names = node.input_nodes
+            node.input_nodes = []
             input_nodes = [compute_nodes[name] for name in input_node_names]
             for in_node in input_nodes:
-                node.InputNodes.append(in_node)
-                in_node.OutputNodes.append(node)
+                node.input_nodes.append(in_node)
+                in_node.output_nodes.append(node)
             graph.append(node)
         return graph
 
