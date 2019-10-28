@@ -1,14 +1,10 @@
 import copy
 import pickle
 from utils import Node
-
-reverse_log_path = "ACAI/metadata/reverse_log_path.pkl"
-fileset_hp_path = "ACAI/metadata/fileset_hp_path.pkl"
-log_path = "ACAI/metadata/log_path.pkl"
-
+from constants import *
 
 class LogManager:
-    def __init__(self, reverse_log_path, fileset_hp_path, log_path):
+    def __init__(self, reverse_log_path=REVERSE_LOG_PATH, fileset_hp_path=FILESET_HP_PATH, log_path=LOG_PATH):
         self.separator = "\t#\t"
         
         # Key: <str> NodeName + "\t#\t" + FileSetVersion

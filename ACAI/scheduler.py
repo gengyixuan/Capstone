@@ -83,7 +83,7 @@ class Scheduler:
                     continue
                 if not submitted:
                     self.build_scripts(node)
-                runJob = Thread(target=self.submit_job, args=(node, hp, input_nodes))
+                runJob = Thread(target=self.submit_job, args=(node, hp, input_nodes, self.log_manager))
                 runJob.start()
                 jobs.append(runJob)
         # Waiting for all jobs to finish
@@ -101,7 +101,7 @@ class Scheduler:
     # hp: hyper parameter setting for this job
     # input_nodes: input node versions for this job
     @staticmethod
-    def submit_job(node, hp, input_nodes):
+    def submit_job(node, hp, input_nodes, log_manager):
         name = node.node_name
         command = "python {}.py ".format(name)
         for key in hp:
@@ -123,7 +123,7 @@ class Scheduler:
             'name': name
         }
         output_version = acaisdk.job.Job().with_attributes(attr).register().run()
-        self.log_manager.save_output_data(node.NodeName, node.ScriptVersion, hp, input_nodes, output_version)
+        log_manager.save_output_data(node.NodeName, node.ScriptVersion, hp, input_nodes, output_version)
 
     # Get all possible hyper parameter settings
     # candidates: dict (key: string, value: list)
