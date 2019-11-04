@@ -19,17 +19,17 @@ class Scheduler:
     # by adding input and output processer
     def build_scripts(self, node):
         node_name = node.node_name
-        script_path = node.script_path
+        script_path = node.script_path[:-3]
         script_name = script_path.split('/')[-1]
         fs = open("{}.py".format(node_name), "w")
         # Import necessary function & tool
-        fs.write("from {} import {}\n".format(script_path, script_name))
+        fs.write("from {} import {}\n".format('.'.join(script_path.split('/')), script_name))
         fs.write("import argparse\n")
         fs.write("import pickle as pkl\n")
         # Build argument parser
         fs.write("parser=argparse.ArgumentParser()\n")
         for hp in node.hyper_parameter:
-            fs.write("parser.add_argument('--{}')\n".format(hp))
+            fs.write("parser.add_argument('--{}')\n".format(hp['name']))
         fs.write("args=parser.parse_args()\n")
         # Get input data and hyper parameters
         fs.write("inputs=dict()\n")
@@ -37,7 +37,7 @@ class Scheduler:
             fs.write("inputs[{}]=pkl.load(open('{}.pkl', 'rb'))".format(in_node.node_name, in_node.node_name))
         fs.write("hps=dict()\n")
         for hp in node.hyper_parameter:
-            fs.write("hps[{}]=args.{},".format(hp, hp))
+            fs.write("hps[{}]=args.{},".format(hp['name'], hp['name']))
         # Call function
         fs.write("rst={}(inputs, hps)".format(script_name))
         # Save the result
@@ -100,6 +100,7 @@ class Scheduler:
                 print("Starting the {}/{} job for node {}".format(cur, total, node.node_name))
                 if not submitted:
                     self.build_scripts(node)
+                    submitted = True
                 runJob = Thread(target=self.submit_job, args=(node, hp, input_nodes, self.log_manager))
                 runJob.start()
                 jobs.append(runJob)
