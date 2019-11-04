@@ -5,7 +5,7 @@ from zipfile import ZipFile
 
 from log_manager import LogManager
 from constants import *
-from acaisdk import acaisdk
+import acaisdk
 
 
 class Scheduler:

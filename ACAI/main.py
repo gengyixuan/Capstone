@@ -11,7 +11,7 @@ if __name__ == '__main__':
     conf_path = args.config
     name_index = conf_path.rfind('/')
     conf_name = conf_path[name_index+1:]
-    workspace = conf_path[:name_index]
+    workspace = conf_path[:name_index+1]
 
     # Begin workflow
     gc = GraphConstructor(workspace)
