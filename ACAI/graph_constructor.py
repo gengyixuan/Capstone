@@ -120,6 +120,12 @@ class GraphConstructor(object):
                 all_same = True
                 if lasttime != currtime:
                     all_same = False
+                    # upload script if not uploaded already
+                    if path not in uploaded:
+                        uploaded.add(script_path)
+                        input_dir = os.path.join(self.workspace, script_path)
+                        File.upload([(input_dir, script_path)], [])\
+                            .as_new_file_set()
                 for path in currdepstime:
                     if path not in lastdeps or lastdeps[path] != currdepstime[path]:
                         all_same = False
