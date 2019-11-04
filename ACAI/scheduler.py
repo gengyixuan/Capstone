@@ -47,20 +47,25 @@ class Scheduler:
         acaisdk.file.File.upload([("{}.zip".format(name), "{}.zip".format(name))])
 
     def run_workflow(self):
+        print("Workflow start")
         # Build graph for topological sort
-        for node in self.graph:
-            node.inputNodesNum = len(node.inputNodes)
-            for pre in node.inputNodes:
-                pre.outputNodes.append(node)
+        # for node in self.graph:
+        #     node.input_nodes_num = len(node.input_nodes)
+        #     for pre in node.input_nodes:
+        #         pre.output_nodes.append(node)
+
         # Execute nodes with zero indegree
         q = []
         for node in self.graph:
-            if node.inputNodes == 0:
+            if node.input_nodes_num == 0:
                 q.append(node)
+        print("Found {} initial nodes".format(len(q)))
         # Count the number of executed nodes
         exec_count = 0
         # Keep looping until all nodes are executed
         while exec_count < len(self.graph):
+            if not q:
+                print("No runnable nodes now. Waiting...")
             # Constantly check if new nodes are added to the queue
             while not q:
                 time.sleep(5000)
@@ -72,29 +77,36 @@ class Scheduler:
     # node: target Node
     # q: Queue of Nodes
     def submit_node(self, node, q):
+        print("Node {} is ready to run. Starting...".format(node.node_name))
         # Go through hyper parameters and input node versions
-        hp_list = self.grid_search(node.hyperParameters)
-        input_nodes_versions = self.grid_search(node.inputNodes)
+        hp_list = self.grid_search(node.hyper_parameter)
+        input_nodes_versions = self.grid_search(node.input_nodes)
         jobs = []
         submitted = False
+        total = len(hp_list) * len(input_nodes_versions)
+        cur = 1
         for hp in hp_list:
             for input_nodes in input_nodes_versions:
-                shouldRun = self.log_manager.experiment_run(node.NodeName, node.ScriptVersion, hp, input_nodes)
+                shouldRun = self.log_manager.experiment_run(node.node_name, node.script_version, hp, input_nodes)
                 if not shouldRun:
+                    print("Skip the {}/{} job for node {}: Already run before".format(cur, total, node.node_name))
                     continue
+                print("Starting the {}/{} job for node {}".format(cur, total, node.node_name))
                 if not submitted:
                     self.build_scripts(node)
                 runJob = Thread(target=self.submit_job, args=(node, hp, input_nodes, self.log_manager))
                 runJob.start()
                 jobs.append(runJob)
+                cur += 1
         # Waiting for all jobs to finish
         for j in jobs:
             j.join()
+        print("All jobs for node {} finished!".format(node.node_name))
         # After this node is finished, check its descendants
         # for executable nodes (nodes with 0 indegree)
-        for out in node.outputNodes:
-            out.inputNodesNum -= 1
-            if out.inputNodesNum == 0:
+        for out in node.output_nodes:
+            out.input_nodes_num -= 1
+            if out.input_nodes_num == 0:
                 q.append(out)
 
     # Submit a job to ACAI System
@@ -124,7 +136,7 @@ class Scheduler:
             'name': name
         }
         output_version = acaisdk.job.Job().with_attributes(attr).register().run()
-        log_manager.save_output_data(node.NodeName, node.ScriptVersion, hp, input_nodes, output_version)
+        log_manager.save_output_data(node.node_name, node.script_version, hp, input_nodes, output_version)
 
     # Get all possible hyper parameter settings
     # candidates: dict (key: string, value: list)

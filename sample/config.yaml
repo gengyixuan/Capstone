@@ -1,6 +1,6 @@
 pipeline: # Pipeline section, defines pipeline's properties
     project_name: text_classifier # Name of the pipeline
-    admin_token: EmDICTBF1ppONSciYVd03M9xkmF6hFqW
+    admin_token: EmDlCTBF1ppONSciYVd03M9xkmF6hFqW
     user_name: AnalyticsTeam
 
 

@@ -1,4 +1,4 @@
-limport yaml
+import yaml
 import io
 import os
 from utils import *
@@ -76,9 +76,9 @@ class GraphConstructor(object):
                 history = yaml.safe_load(stream)
 
         # read credentials
-        project_name = config['project_name']
-        user_name = config['user_name']
-        admin_token = config['admin_token']
+        project_name = config['pipeline']['project_name']
+        user_name = config['pipeline']['user_name']
+        admin_token = config['pipeline']['admin_token']
 
         # create project / user if this is first time
         if not history:
@@ -127,7 +127,7 @@ class GraphConstructor(object):
                         if path not in uploaded:
                             uploaded.add(path)
                             input_dir = os.path.join(self.workspace, path)
-                            File.upload([(input_dir, path)], [])
+                            File.upload([(input_dir, path)], [])\
                                 .as_new_file_set()
                         
                 if all_same:
