@@ -16,10 +16,10 @@ from acaisdk.utils import utils
 utils.DEBUG = True  # print debug messages
 
 # class ComputeNode:
-#     def __init__(self, node_name="", script_name="", script_version=0, 
+#     def __init__(self, node_name="", script_path="", script_version=0,
 #                  input_nodes=[], output_nodes=[], hyperparams={}):
 #         self.NodeName = node_name
-#         self.ScriptName = script_name
+#         self.ScriptName = script_path
 #         self.ScriptVersion = script_version
 #         self.InputNodes = input_nodes
 #         self.OutputNodes = output_nodes
@@ -101,21 +101,21 @@ class GraphConstructor(object):
         uploaded = {}
         for module in config['modules']:
             node_name = module['node']
-            script_name = module['script']
+            script_path = module['script']
 
             # compute version of this node
             script_version = 0
-            currtime = self.getmtime(script_name)
+            currtime = self.getmtime(script_path)
             currdepstime = {}
             dependencies = {} if 'dependencies' not in module else module['dependencies']
             for path in dependencies:
                 currdepstime[path] = self.getmtime(path)
-            if script_name not in version_map:
-                version_map[script_name] = {'version': 0, 'script_lastmtime': currtime, 'deps': currdepstime}
+            if script_path not in version_map:
+                version_map[script_path] = {'version': 0, 'script_lastmtime': currtime, 'deps': currdepstime}
             else:
-                lastversion = version_map[script_name]['version']
-                lasttime = version_map[script_name]['script_lastmtime']
-                lastdeps = version_map[script_name]['deps']
+                lastversion = version_map[script_path]['version']
+                lasttime = version_map[script_path]['script_lastmtime']
+                lastdeps = version_map[script_path]['deps']
                 # check if everything is the same as last time, upload the changed dependencies
                 all_same = True
                 if lasttime != currtime:
@@ -134,17 +134,17 @@ class GraphConstructor(object):
                     script_version = lastversion
                 else:
                     script_version = lastversion + 1
-                    version_map[script_name] = {'version': script_version, 'script_lastmtime': currtime, 'deps': currdepstime} 
+                    version_map[script_path] = {'version': script_version, 'script_lastmtime': currtime, 'deps': currdepstime}
             
             # continue building the new node
             hyperparams = module['params']
             input_nodes = [] if 'input_nodes' not in module else module['input_nodes']
             newnode = Node(node_name=node_name,
-                          script_name=script_name, 
+                          script_path=script_path,
                           script_version=script_version, 
                           input_nodes=input_nodes,
                           output_nodes=[],
-                          dependencies=module['dependencies'],
+                          dependencies=module['dependencies'] if 'dependencies' in module else [],
                           hyperparams=hyperparams)
             compute_nodes[node_name] = newnode
 
