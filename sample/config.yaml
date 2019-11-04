@@ -1,5 +1,4 @@
 pipeline: # Pipeline section, defines pipeline's properties
-    mode: local # Running mode, local or docker, default local
     project_name: text_classifier # Name of the pipeline
     admin_token: EmDICTBF1ppONSciYVd03M9xkmF6hFqW
     user_name: AnalyticsTeam

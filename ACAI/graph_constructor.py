@@ -70,13 +70,35 @@ class GraphConstructor(object):
             config = yaml.safe_load(stream)
 
         # read version history from disk
-        version_map = {}
-        if isExist('_versions.yaml'):
-            with open(self.workspace+"_versions.yaml", 'r') as stream:
-                version_map = yaml.safe_load(stream)
+        history = {}
+        if self.isExist('_history.yaml'):
+            with open(self.workspace+"_history.yaml", 'r') as stream:
+                history = yaml.safe_load(stream)
+
+        # read credentials
+        project_name = config['project_name']
+        user_name = config['user_name']
+        admin_token = config['admin_token']
+
+        # create project / user if this is first time
+        if not history:
+            r = Project.create_project(project_name, admin_token, 'proj_admin')
+            r = Project.create_user(project_name, r['project_admin_token'], user_name)
+            history['credentials'] = {'ACAI_PROJECT': project_name,
+                                      'ACAI_TOKEN': r['user_token']}
+        
+        # update environment var with credentials
+        for key in history['credentials']:
+            os.environ[key] = history['credentials'][key]
+
+        # create version map under history if history was empty
+        if 'versions' not in history:
+            history['versions'] = {}
+        version_map = history['versions']
 
         # create compute nodes
         compute_nodes = {}
+        uploaded = {}
         for module in config['modules']:
             node_name = module['node']
             script_name = module['script']
@@ -94,18 +116,19 @@ class GraphConstructor(object):
                 lastversion = version_map[script_name]['version']
                 lasttime = version_map[script_name]['script_lastmtime']
                 lastdeps = version_map[script_name]['deps']
-                # check if everything is the same as last time
+                # check if everything is the same as last time, upload the changed dependencies
                 all_same = True
                 if lasttime != currtime:
                     all_same = False
                 for path in currdepstime:
                     if path not in lastdeps or lastdeps[path] != currdepstime[path]:
                         all_same = False
-                        # upload path files to ACAI cloud
-                        input_dir = os.path.join(self.workspace, 'Shakespeare')
-                        File.convert_to_file_mapping([input_dir], 'Shakespeare/')[0]\
-                            .upload()\
-                            .as_new_file_set('shakespeare.works')
+                        # upload curr version of path files to ACAI cloud if not yet uploaded
+                        if path not in uploaded:
+                            uploaded.add(path)
+                            input_dir = os.path.join(self.workspace, path)
+                            File.upload([(input_dir, path)], [])
+                                .as_new_file_set()
                         
                 if all_same:
                     script_version = lastversion
@@ -125,8 +148,8 @@ class GraphConstructor(object):
             compute_nodes[node_name] = newnode
 
         # save new version map to disk
-        with io.open(self.workspace+'_versions.yaml', 'w+', encoding='utf8') as outfile:
-            yaml.dump(version_map, outfile, default_flow_style=False, allow_unicode=True)
+        with io.open(self.workspace+'_history.yaml', 'w+', encoding='utf8') as outfile:
+            yaml.dump(history, outfile, default_flow_style=False, allow_unicode=True)
 
         # second pass to connect in/out edges between nodes
         graph = []
