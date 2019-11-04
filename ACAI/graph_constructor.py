@@ -144,6 +144,7 @@ class GraphConstructor(object):
                           script_version=script_version, 
                           input_nodes=input_nodes,
                           output_nodes=[],
+                          dependencies=module['dependencies'],
                           hyperparams=hyperparams)
             compute_nodes[node_name] = newnode
 
