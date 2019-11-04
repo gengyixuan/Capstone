@@ -24,6 +24,8 @@ modules:
 
     -   node: append1 # Name of the module
         script: src/append1.py
+        input_nodes:
+            -   reader
         params:
             -   name: num
                 type: collection # Type of the param, int, float or collection
@@ -34,6 +36,8 @@ modules:
 
     -   node: append2 # Name of the module
         script: src/append2.py
+        input_nodes:
+            -   reader
         params:
             -   name: num
                 type: collection # Type of the param, int, float or collection
