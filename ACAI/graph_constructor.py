@@ -1,7 +1,19 @@
-import yaml
+limport yaml
 import io
 import os
 from utils import *
+
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.realpath('__file__')) + '/../../')
+from acaisdk.file import File
+from acaisdk.project import Project
+from acaisdk.fileset import FileSet
+from acaisdk.job import Job
+from acaisdk.meta import *
+from acaisdk.utils import utils
+
+utils.DEBUG = True  # print debug messages
 
 # class ComputeNode:
 #     def __init__(self, node_name="", script_name="", script_version=0, 
@@ -42,11 +54,11 @@ class GraphConstructor(object):
         self.workspace = workspace
     
     def isExist(self, path):
-        path = self.workspace + path
+        path = os.path.join(self.workspace, path)
         return os.path.isfile(path) or os.path.isdir(path)
 
     def getmtime(self, path):
-        path = self.workspace + path
+        path = os.path.join(self.workspace, path)
         if self.isExist(path):
             return str(os.path.getmtime(path))
         else:
@@ -60,7 +72,7 @@ class GraphConstructor(object):
         # read version history from disk
         version_map = {}
         if isExist('_versions.yaml'):
-            with open(workspace+"_versions.yaml", 'r') as stream:
+            with open(self.workspace+"_versions.yaml", 'r') as stream:
                 version_map = yaml.safe_load(stream)
 
         # create compute nodes
@@ -86,11 +98,15 @@ class GraphConstructor(object):
                 all_same = True
                 if lasttime != currtime:
                     all_same = False
-                else:
-                    for path in currdepstime:
-                        if path not in lastdeps or lastdeps[path] != currdepstime[path]:
-                            all_same = False
-                            break
+                for path in currdepstime:
+                    if path not in lastdeps or lastdeps[path] != currdepstime[path]:
+                        all_same = False
+                        # upload path files to ACAI cloud
+                        input_dir = os.path.join(self.workspace, 'Shakespeare')
+                        File.convert_to_file_mapping([input_dir], 'Shakespeare/')[0]\
+                            .upload()\
+                            .as_new_file_set('shakespeare.works')
+                        
                 if all_same:
                     script_version = lastversion
                 else:
