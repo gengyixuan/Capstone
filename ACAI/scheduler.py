@@ -7,6 +7,7 @@ from log_manager import LogManager
 from constants import *
 from acaisdk import acaisdk
 
+
 class Scheduler:
     # graph: list of Node
     def __init__(self, graph):
@@ -31,14 +32,14 @@ class Scheduler:
         # Get input data and hyper parameters
         fs.write("inputs=dict()\n")
         for in_node in node.input_nodes:
-            fs.write("inputs[{}]=pkl.load('{}.pkl')".format(in_node.node_name, in_node.node_name))
+            fs.write("inputs[{}]=pkl.load(open('{}.pkl', 'rb'))".format(in_node.node_name, in_node.node_name))
         fs.write("hps=dict()\n")
         for hp in node.hyper_parameter:
             fs.write("hps[{}]=args.{},".format(hp, hp))
         # Call function
         fs.write("rst={}(inputs, hps)".format(name))
         # Save the result
-        fs.write("pkl.dump(rst, '{}/{}.pkl')".format(OUTPUT_PATH, name))
+        fs.write("pkl.dump(rst, open('{}/{}.pkl', 'wb'))".format(OUTPUT_PATH, name))
         # Compress the script and submit to ACAI system
         fs.close()
         with ZipFile("{}.zip".format(name), "w") as zipf:
