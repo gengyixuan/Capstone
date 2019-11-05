@@ -54,14 +54,15 @@ class GraphConstructor(object):
         self.workspace = workspace
 
     # return list of all file paths in dir 
-    # dir: relative path to workspace
+    # path: relative path to workspace
     # returned path is relative path to workspace
-    def list_all_file_paths(self, dir):
+    def list_all_file_paths(self, path):
         # if dir is a file itself, return [dir]
-        if os.path.isfile(dir):
-            return [dir]
+        path = os.path.join(self.workspace, path)
+        if os.path.isfile(path):
+            return [path]
         all_rel_paths = []
-        for r, d, f in os.walk(dir):
+        for r, d, f in os.walk(path):
             for file in f:
                 all_rel_paths.append(os.path.relpath(os.path.join(r, file), start=self.workspace))
         return all_rel_paths
