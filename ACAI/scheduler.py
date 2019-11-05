@@ -11,23 +11,25 @@ import acaisdk
 class Scheduler:
     # graph: list of Node
     def __init__(self, graph):
-        self.nodeVersions = dict()
+        self.node_versions = dict()
         self.graph = graph
         self.log_manager = LogManager()
 
     # Build script files for each user-provided function
     # by adding input and output processer
     def build_scripts(self, node):
-        name = node.script_name
-        fs = open("{}.py".format(name), "w")
+        node_name = node.node_name
+        script_path = node.script_path[:-3]
+        script_name = script_path.split('/')[-1]
+        fs = open("{}.py".format(node_name), "w")
         # Import necessary function & tool
-        fs.write("from {} import {}\n".format(name, name))
+        fs.write("from {} import {}\n".format('.'.join(script_path.split('/')), script_name))
         fs.write("import argparse\n")
         fs.write("import pickle as pkl\n")
         # Build argument parser
         fs.write("parser=argparse.ArgumentParser()\n")
         for hp in node.hyper_parameter:
-            fs.write("parser.add_argument('--{}')\n".format(hp))
+            fs.write("parser.add_argument('--{}')\n".format(hp['name']))
         fs.write("args=parser.parse_args()\n")
         # Get input data and hyper parameters
         fs.write("inputs=dict()\n")
@@ -35,16 +37,16 @@ class Scheduler:
             fs.write("inputs[{}]=pkl.load(open('{}.pkl', 'rb'))".format(in_node.node_name, in_node.node_name))
         fs.write("hps=dict()\n")
         for hp in node.hyper_parameter:
-            fs.write("hps[{}]=args.{},".format(hp, hp))
+            fs.write("hps['{}']=args.{}\n".format(hp['name'], hp['name']))
         # Call function
-        fs.write("rst={}(inputs, hps)".format(name))
+        fs.write("rst={}(inputs, hps)\n".format(script_name))
         # Save the result
-        fs.write("pkl.dump(rst, open('{}/{}.pkl', 'wb'))".format(OUTPUT_PATH, name))
+        fs.write("pkl.dump(rst, open('{}/{}.pkl', 'wb'))\n".format(OUTPUT_PATH, script_name))
         # Compress the script and submit to ACAI system
         fs.close()
-        with ZipFile("{}.zip".format(name), "w") as zipf:
-            zipf.write("{}.py".format(name))
-        acaisdk.file.File.upload([("{}.zip".format(name), "{}.zip".format(name))])
+        with ZipFile("{}.zip".format(node_name), "w") as zipf:
+            zipf.write("{}.py".format(node_name))
+        acaisdk.file.File.upload([("{}.zip".format(node_name), "{}.zip".format(node_name))])
 
     def run_workflow(self):
         print("Workflow start")
@@ -68,7 +70,7 @@ class Scheduler:
                 print("No runnable nodes now. Waiting...")
             # Constantly check if new nodes are added to the queue
             while not q:
-                time.sleep(5000)
+                time.sleep(SLEEP_INTERVAL)
             # Submit current node for execution in a new thread
             runNode = Thread(target=self.submit_node, args=(q.pop(0), q))
             runNode.start()
@@ -79,21 +81,26 @@ class Scheduler:
     def submit_node(self, node, q):
         print("Node {} is ready to run. Starting...".format(node.node_name))
         # Go through hyper parameters and input node versions
-        hp_list = self.grid_search(node.hyper_parameter)
-        input_nodes_versions = self.grid_search(node.input_nodes)
+        hp_list = self.grid_search_hp(node.hyper_parameter)
+        input_nodes_versions = self.grid_search_nv(node.input_nodes)
         jobs = []
         submitted = False
         total = len(hp_list) * len(input_nodes_versions)
         cur = 1
         for hp in hp_list:
             for input_nodes in input_nodes_versions:
-                shouldRun = self.log_manager.experiment_run(node.node_name, node.script_version, hp, input_nodes)
+                shouldRun, version = self.log_manager.experiment_run(node.node_name, node.script_version, hp, input_nodes)
                 if not shouldRun:
-                    print("Skip the {}/{} job for node {}: Already run before".format(cur, total, node.node_name))
+                    if version:
+                        self.add_node_version(node, version)
+                        print("Skip the {}/{} job for node {}: Already run before".format(cur, total, node.node_name))
+                    else:
+                        print("Skip the {}/{} job for node {}: Bad common ancestor".format(cur, total, node.node_name))
                     continue
                 print("Starting the {}/{} job for node {}".format(cur, total, node.node_name))
                 if not submitted:
                     self.build_scripts(node)
+                    submitted = True
                 runJob = Thread(target=self.submit_job, args=(node, hp, input_nodes, self.log_manager))
                 runJob.start()
                 jobs.append(runJob)
@@ -113,8 +120,7 @@ class Scheduler:
     # node: target Node
     # hp: hyper parameter setting for this job
     # input_nodes: input node versions for this job
-    @staticmethod
-    def submit_job(node, hp, input_nodes, log_manager):
+    def submit_job(self, node, hp, input_nodes, log_manager):
         name = node.node_name
         command = "python {}.py ".format(name)
         for key in hp:
@@ -122,6 +128,9 @@ class Scheduler:
         fileset_list = []
         for in_node in input_nodes:
             fileset_list.append("@{}:{}".format(in_node, input_nodes[in_node]))
+        for dependency in node.dependencies:
+            fileset_list.append("@{}".format(dependency))
+        fileset_list.append("@{}".format(node.script_path))
         input_file_set = acaisdk.fileset.FileSet.create_file_set("{}_input".format(name), fileset_list)
         attr = {
             "v_cpu": "0.5",
@@ -136,21 +145,53 @@ class Scheduler:
             'name': name
         }
         output_version = acaisdk.job.Job().with_attributes(attr).register().run()
+        self.add_node_version(node, output_version)
         log_manager.save_output_data(node.node_name, node.script_version, hp, input_nodes, output_version)
 
+    def add_node_version(self, node, version):
+        name = node.node_name
+        if name not in self.node_versions:
+            self.node_versions[name] = []
+        self.node_versions[name].append(version)
+
     # Get all possible hyper parameter settings
-    # candidates: dict (key: string, value: list)
+    # hps: list of dict
     @staticmethod
-    def grid_search(candidates):
+    def grid_search_hp(hps):
         combo_list = [{}]
-        for name in candidates:
+        for hp in hps:
+            name = hp['name']
+            new_combo_list = []
             for cur_combo in combo_list:
-                for value in candidates[name]:
-                    new_hp = cur_combo.copy()
-                    new_hp[name] = value
-                    combo_list.append(new_hp)
-                combo_list.remove(cur_combo)
+                if hp['type'] == 'float':
+                    value = hp['start']
+                    while value < hp['end']:
+                        new_hp = cur_combo.copy()
+                        new_hp[name] = value
+                        new_combo_list.append(new_hp)
+                        value += hp['step_size']
+                elif hp['type'] == 'collection':
+                    for value in hp['values']:
+                        new_hp = cur_combo.copy()
+                        new_hp[name] = value
+                        new_combo_list.append(new_hp)
+            combo_list = new_combo_list
         return combo_list
-    
+
+    # Get all input node version settings
+    # nv: list of Node
+    def grid_search_nv(self, nodes):
+        combo_list = [{}]
+        for node in nodes:
+            name = node.node_name
+            new_combo_list = []
+            for cur_combo in combo_list:
+                for value in self.node_versions[name]:
+                    new_nv = cur_combo.copy()
+                    new_nv[name] = value
+                    new_combo_list.append(new_nv)
+            combo_list = new_combo_list
+        return combo_list
+
     # Reach goal
     # def bayesian_search(self):

@@ -16,10 +16,10 @@ from acaisdk.utils import utils
 utils.DEBUG = True  # print debug messages
 
 # class ComputeNode:
-#     def __init__(self, node_name="", script_name="", script_version=0, 
+#     def __init__(self, node_name="", script_path="", script_version=0,
 #                  input_nodes=[], output_nodes=[], hyperparams={}):
 #         self.NodeName = node_name
-#         self.ScriptName = script_name
+#         self.ScriptName = script_path
 #         self.ScriptVersion = script_version
 #         self.InputNodes = input_nodes
 #         self.OutputNodes = output_nodes
@@ -179,7 +179,7 @@ class GraphConstructor(object):
             hyperparams = module['params']
             input_nodes = [] if 'input_nodes' not in module else module['input_nodes']
             newnode = Node(node_name=node_name,
-                          script_name=script_name, 
+                          script_path=script_path,
                           script_version=script_version, 
                           input_nodes=input_nodes,
                           output_nodes=[],

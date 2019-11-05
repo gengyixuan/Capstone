@@ -133,10 +133,10 @@ class LogManager:
                     break
             
             if all_match:
-                return False
+                return False, self.log[check_log][1]
 
         all_paths = self.tracking_ancestors(inputs)
-        return self.check_ancestors_hp(all_paths)
+        return self.check_ancestors_hp(all_paths), None
 
 
     def save_output_data(self, node_name, script_version, hyper_parameter, inputs, output_fileset_version):
