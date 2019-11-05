@@ -148,10 +148,7 @@ class GraphConstructor(object):
         script_versions = {}
         if 'script_versions' in history:
             script_versions = history['script_versions']
-            # {node_name: version}
-
-            # {node_name: {"version":version, 
-            #              "deps": {needed_file: latest modified time} } dict
+            # {node_name: {"version":version, "script_path":script_path}
 
         # create compute nodes
         compute_nodes = {}
@@ -162,19 +159,24 @@ class GraphConstructor(object):
 
             # compute script version:
             if node_name not in script_versions:
-                script_versions[node_name] = 0
+                script_versions[node_name] = {"version": 0, "script_path": script_path}
             else:
-                # get all needed files (one script file + optional data files) for this node
-                needed_files = [script_path]
-                dependencies = {} if 'dependencies' not in module else module['dependencies']
-                for path in dependencies:
-                    needed_files += self.list_all_file_paths(path)
+                past_version = script_versions[node_name]["version"]
+                past_script = script_versions[node_name]["script_path"]
+                if script_path != past_script:
+                    script_versions[node_name] = {"version": past_version + 1, "script_path": script_path}
+                else:
+                    # get all needed files (one script file + optional data files) for this node
+                    needed_files = [script_path]
+                    dependencies = {} if 'dependencies' not in module else module['dependencies']
+                    for path in dependencies:
+                        needed_files += self.list_all_file_paths(path)
 
-                # if any of the needed files is in modified set, increment script version by 1
-                for needed_file in needed_files:
-                    if needed_file in modified:
-                        script_versions[node_name] += 1
-                        break
+                    # if any of the needed files is in modified set, increment script version by 1
+                    for needed_file in needed_files:
+                        if needed_file in modified:
+                            script_versions[node_name]["version"] += 1
+                            break
 
             # continue building the new node
             hyperparams = module['params']
