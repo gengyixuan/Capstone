@@ -181,7 +181,7 @@ class GraphConstructor(object):
             input_nodes = [] if 'input_nodes' not in module else module['input_nodes']
             newnode = Node(node_name=node_name,
                           script_path=script_path,
-                          script_version=script_version, 
+                          script_version=script_versions[node_name],
                           input_nodes=input_nodes,
                           output_nodes=[],
                           dependencies=[] if 'dependencies' not in module else module['dependencies'],
