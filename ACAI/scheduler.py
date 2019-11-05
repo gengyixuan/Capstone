@@ -129,8 +129,8 @@ class Scheduler:
         for in_node in input_nodes:
             fileset_list.append("@{}:{}".format(in_node, input_nodes[in_node]))
         for dependency in node.dependencies:
-            fileset_list.append("@{}".format(dependency))
-        fileset_list.append("@{}".format(node.script_path))
+            fileset_list.append("{}".format(dependency))
+        fileset_list.append("{}".format(node.script_path))
         input_file_set = acaisdk.fileset.FileSet.create_file_set("{}_input".format(name), fileset_list)
         attr = {
             "v_cpu": "0.5",
