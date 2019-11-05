@@ -37,11 +37,11 @@ class Scheduler:
             fs.write("inputs[{}]=pkl.load(open('{}.pkl', 'rb'))".format(in_node.node_name, in_node.node_name))
         fs.write("hps=dict()\n")
         for hp in node.hyper_parameter:
-            fs.write("hps[{}]=args.{},".format(hp['name'], hp['name']))
+            fs.write("hps['{}']=args.{}\n".format(hp['name'], hp['name']))
         # Call function
-        fs.write("rst={}(inputs, hps)".format(script_name))
+        fs.write("rst={}(inputs, hps)\n".format(script_name))
         # Save the result
-        fs.write("pkl.dump(rst, open('{}/{}.pkl', 'wb'))".format(OUTPUT_PATH, script_name))
+        fs.write("pkl.dump(rst, open('{}/{}.pkl', 'wb'))\n".format(OUTPUT_PATH, script_name))
         # Compress the script and submit to ACAI system
         fs.close()
         with ZipFile("{}.zip".format(node_name), "w") as zipf:
@@ -70,7 +70,7 @@ class Scheduler:
                 print("No runnable nodes now. Waiting...")
             # Constantly check if new nodes are added to the queue
             while not q:
-                time.sleep(5000)
+                time.sleep(SLEEP_INTERVAL)
             # Submit current node for execution in a new thread
             runNode = Thread(target=self.submit_node, args=(q.pop(0), q))
             runNode.start()
@@ -130,6 +130,7 @@ class Scheduler:
             fileset_list.append("@{}:{}".format(in_node, input_nodes[in_node]))
         for dependency in node.dependencies:
             fileset_list.append("@{}".format(dependency))
+        fileset_list.append("@{}".format(node.script_path))
         input_file_set = acaisdk.fileset.FileSet.create_file_set("{}_input".format(name), fileset_list)
         attr = {
             "v_cpu": "0.5",
