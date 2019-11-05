@@ -52,14 +52,27 @@ utils.DEBUG = True  # print debug messages
 class GraphConstructor(object):
     def __init__(self, workspace):
         self.workspace = workspace
+
+    # return list of all file paths in dir 
+    # dir: relative path to workspace
+    # returned path is relative path to workspace
+    def list_all_file_paths(self, dir):
+        # if dir is a file itself, return [dir]
+        if os.path.isfile(dir):
+            return [dir]
+        all_rel_paths = []
+        for r, d, f in os.walk(dir):
+            for file in f:
+                all_rel_paths.append(os.path.relpath(os.path.join(r, file), start=self.workspace))
+        return all_rel_paths
     
-    def isExist(self, path):
+    def is_exist(self, path):
         path = os.path.join(self.workspace, path)
         return os.path.isfile(path) or os.path.isdir(path)
 
-    def getmtime(self, path):
+    def get_modified_time(self, path):
         path = os.path.join(self.workspace, path)
-        if self.isExist(path):
+        if self.is_exist(path):
             return str(os.path.getmtime(path))
         else:
             return None
@@ -71,7 +84,7 @@ class GraphConstructor(object):
 
         # read version history from disk
         history = {}
-        if self.isExist('_history.yaml'):
+        if self.is_exist('_history.yaml'):
             with open(self.workspace+"_history.yaml", 'r') as stream:
                 history = yaml.safe_load(stream)
 
@@ -91,57 +104,77 @@ class GraphConstructor(object):
         for key in history['credentials']:
             os.environ[key] = history['credentials'][key]
 
-        # create version map under history if history was empty
-        if 'versions' not in history:
-            history['versions'] = {}
-        version_map = history['versions']
+        # get from history: last snapshot of workspace: file modified times
+        file_versions = {}
+        if 'file_versions' in history:
+            file_versions = history['file_versions'] 
+            # {filepath: {"time": latest modified time, "version": version}} dict
+
+        # get current file modified times
+        # figure out set of modified files
+        # update versions map
+        curr_files = self.list_all_file_paths(self.workspace)
+        modified = set()
+        for curr_file in curr_files:
+            curr_mod_time = self.get_modified_time(curr_file)
+            if curr_file not in file_versions or curr_mod_time != file_versions[curr_file]['time']:
+                # curr_file is modified
+                modified.add(curr_file)
+                # update versions map
+                curr_version = 0 if curr_file not in file_versions else file_versions[curr_file]['version'] + 1
+                file_versions[curr_file] = {"time": curr_mod_time, "version": curr_version}
+
+        # figure out set of needed files for current run
+        needed = set()
+        for module in config['modules']:
+            script_path = module['script']
+            needed.add(script_path)
+            dependencies = {} if 'dependencies' not in module else module['dependencies']
+            for path in dependencies:
+                for needed_file in self.list_all_file_paths(path):
+                    needed.add(needed_file)
+
+
+        # for a file that is both needed for current run and has been modified from last snapshot, upload it
+        for needed_file in needed:
+            if needed_file in modified:
+                input_dir = os.path.join(self.workspace, needed_file)
+                print("uploading: "+needed_file)
+                File.upload([(input_dir, needed_file)], []).as_new_file_set(needed_file)
+
+        # load script versions to prepare for subsequent stage of generating "compute nodes"
+        # note that a script version is dependent on both script file version and dependent file versions
+        script_versions = {}
+        if 'script_versions' in history:
+            script_versions = history['script_versions']
+            # {node_name: version}
+
+            # {node_name: {"version":version, 
+            #              "deps": {needed_file: latest modified time} } dict
 
         # create compute nodes
         compute_nodes = {}
-        uploaded = {}
+        uploaded = set()
         for module in config['modules']:
             node_name = module['node']
-            script_name = module['script']
+            script_path = module['script']
 
-            # compute version of this node
-            script_version = 0
-            currtime = self.getmtime(script_name)
-            currdepstime = {}
-            dependencies = {} if 'dependencies' not in module else module['dependencies']
-            for path in dependencies:
-                currdepstime[path] = self.getmtime(path)
-            if script_name not in version_map:
-                version_map[script_name] = {'version': 0, 'script_lastmtime': currtime, 'deps': currdepstime}
+            # compute script version:
+            if node_name not in script_versions:
+                script_versions[node_name] = 0
             else:
-                lastversion = version_map[script_name]['version']
-                lasttime = version_map[script_name]['script_lastmtime']
-                lastdeps = version_map[script_name]['deps']
-                # check if everything is the same as last time, upload the changed dependencies
-                all_same = True
-                if lasttime != currtime:
-                    all_same = False
-                    # upload script if not uploaded already
-                    if path not in uploaded:
-                        uploaded.add(script_path)
-                        input_dir = os.path.join(self.workspace, script_path)
-                        File.upload([(input_dir, script_path)], [])\
-                            .as_new_file_set()
-                for path in currdepstime:
-                    if path not in lastdeps or lastdeps[path] != currdepstime[path]:
-                        all_same = False
-                        # upload curr version of path files to ACAI cloud if not yet uploaded
-                        if path not in uploaded:
-                            uploaded.add(path)
-                            input_dir = os.path.join(self.workspace, path)
-                            File.upload([(input_dir, path)], [])\
-                                .as_new_file_set()
-                        
-                if all_same:
-                    script_version = lastversion
-                else:
-                    script_version = lastversion + 1
-                    version_map[script_name] = {'version': script_version, 'script_lastmtime': currtime, 'deps': currdepstime} 
-            
+                # get all needed files (one script file + optional data files) for this node
+                needed_files = [script_path]
+                dependencies = {} if 'dependencies' not in module else module['dependencies']
+                for path in dependencies:
+                    needed_files += self.list_all_file_paths(path)
+
+                # if any of the needed files is in modified set, increment script version by 1
+                for needed_file in needed_files:
+                    if needed_file in modified:
+                        script_versions[node_name] += 1
+                        break
+
             # continue building the new node
             hyperparams = module['params']
             input_nodes = [] if 'input_nodes' not in module else module['input_nodes']
@@ -150,11 +183,13 @@ class GraphConstructor(object):
                           script_version=script_version, 
                           input_nodes=input_nodes,
                           output_nodes=[],
-                          dependencies=module['dependencies'],
+                          dependencies=[] if 'dependencies' not in module else module['dependencies'],
                           hyperparams=hyperparams)
             compute_nodes[node_name] = newnode
 
-        # save new version map to disk
+        # save new history dict to disk
+        history['script_versions'] = script_versions
+        history['file_versions'] = file_versions
         with io.open(self.workspace+'_history.yaml', 'w+', encoding='utf8') as outfile:
             yaml.dump(history, outfile, default_flow_style=False, allow_unicode=True)
 
