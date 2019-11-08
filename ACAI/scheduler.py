@@ -39,7 +39,7 @@ class Scheduler:
         # Get input data and hyper parameters
         fs.write("inputs=dict()\n")
         for in_node in node.input_nodes:
-            fs.write("inputs[{}]=pkl.load(open('{}.pkl', 'rb'))".format(in_node.node_name, in_node.node_name))
+            fs.write("inputs['{}']=pkl.load(open('{}.pkl', 'rb'))\n".format(in_node.node_name, in_node.node_name))
         fs.write("hps=dict()\n")
         for hp in node.hyper_parameter:
             fs.write("hps['{}']=args.{}\n".format(hp['name'], hp['name']))

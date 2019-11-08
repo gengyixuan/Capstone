@@ -161,6 +161,7 @@ class GraphConstructor(object):
             if node_name not in script_versions:
                 script_versions[node_name] = {"version": 0, "script_path": script_path}
             else:
+                print(script_versions)
                 past_version = script_versions[node_name]["version"]
                 past_script = script_versions[node_name]["script_path"]
                 if script_path != past_script:
@@ -183,7 +184,7 @@ class GraphConstructor(object):
             input_nodes = [] if 'input_nodes' not in module else module['input_nodes']
             newnode = Node(node_name=node_name,
                           script_path=script_path,
-                          script_version=script_versions[node_name],
+                          script_version=script_versions[node_name]["version"],
                           input_nodes=input_nodes,
                           output_nodes=[],
                           dependencies=[] if 'dependencies' not in module else module['dependencies'],
