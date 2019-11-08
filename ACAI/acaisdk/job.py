@@ -3,12 +3,25 @@ import yaml
 from acaisdk.utils.exceptions import *
 from collections import OrderedDict
 from acaisdk.services.api_calls import *
+from acaisdk.fileset import FileSet
 from typing import Union, Tuple, List, Dict
 from pprint import pformat
 import time
 
 
 class JobStatus(Enum):
+    """
+    :ivar QUEUEING:
+    :ivar LAUNCHING:
+    :ivar DOWNLOADING:
+    :ivar RUNNING:
+    :ivar UPLOADING:
+    :ivar FINISHED:
+    :ivar FAILED:
+    :ivar KILLED:
+    :ivar CONTAINER_CRASHED:
+    :ivar UNKNOWN: It seems that the job does not exist
+    """
     QUEUEING = auto()
     LAUNCHING = auto()
     DOWNLOADING = auto()
@@ -28,21 +41,24 @@ class JobStatus(Enum):
 class Job:
     """Run a job on the cloud.
 
-    Typical usage:
+    Typical usage (go to `example` folder for a sample workflow
+    on Jupyter notebook):
 
     .. code-block:: python
 
+        command = "mkdir -p ./my_output/ && " \\
+                  "(cat Shakespeare/* | python3 wordcount.py ./my_output/)"
         attr = {
-            "v_cpu": "0.5",
-            "memory": "320Mi",
+            "v_cpu": "0.2",
+            "memory": "64Mi",
             "gpu": "0",
-            "command": "echo hello world from default job",
+            "command": command,
             "container_image": "pytorch/pytorch",
-            'input_file_set': 'sterling',
-            'output_path': 'outputlalapath',
-            'code': '/albertinputs/demo.zip',
-            'description': 'nothinghere',
-            'name': 'my test job'
+            'input_file_set': 'shakespeare.texts',
+            'output_path': './my_output/',
+            'code': '/wordcount.zip',
+            'description': 'count some words from Shakespeare works',
+            'name': 'my_acai_job'
         }
 
         Job().with_attributes(attr).register().run()
@@ -120,6 +136,7 @@ class Job:
         'memory',
         'registered',
         'submitted',
+        'job_status',
     ]
     _required_fields = [
         'name',
@@ -133,9 +150,10 @@ class Job:
         'gpu',
         'memory',
     ]
-    _blacklist_fields = [
-        'id',
-        'output_file_set',
+    _blacklist_fields_print = [
+
+    ]
+    _blacklist_fields_submit = [
         'updated_time',
         'registered',
         'submitted'
@@ -145,6 +163,7 @@ class Job:
         self.registered = False
         self.submitted = False
         self.v_cpu, self.gpu, self.memory = '0.5', '512Mi', '0'
+        self.job_status = None
 
     def register(self):
         """Register the job with ACAI backend. Only registered job can be run.
@@ -152,8 +171,16 @@ class Job:
         if self.registered:
             raise AcaiException('Job already registered')
         self._validate()
+
+        # use full id of input file set
+        self.input_file_set = \
+            FileSet.list_file_set_content(self.input_file_set)['id']
+
+        data = {k: v for k, v in self.dict.items()
+                if k not in self._blacklist_fields_submit}
+
         r = RestRequest(JobRegistryApi.new_job) \
-            .with_data(self.dict) \
+            .with_data(data) \
             .with_credentials() \
             .run()
         self.with_attributes(r)
@@ -255,7 +282,8 @@ class Job:
         j = Job()
         j.id = job_id
         j.registered = True
-        return j.with_attributes(j._info())
+        j.with_attributes(j._info())
+        return j
 
     def _info(self):
         return RestRequest(JobRegistryApi.job) \
@@ -265,7 +293,7 @@ class Job:
 
     # ===== STATUS =====
     @staticmethod
-    def check_job_status(job_id) -> 'Job':
+    def check_job_status(job_id) -> JobStatus:
         """Check job status by job ID.
 
         Usage:
@@ -274,44 +302,65 @@ class Job:
         """
         return Job.find(job_id).status()
 
-    def status(self):
+    def status(self) -> JobStatus:
         """Check the status of the current job.
-
-        Possible status:
-
-        .. code-block::
-
-            Queueing
-            Launching
-            Downloading
-            Running
-            Uploading
-            Finished
-            Failed
-            Killed
-            Container Crashed
-            Unknown
 
         Usage:
 
-        >>> my_job = Job.find(10).status()
+        >>> status = Job.find(10).status()
+
+        In the mean time, output file set is updated. But it will
+        only be meaningful when the job is successfully finished. You can
+        then access it by
+
+        >>> j = Job.find(123).status()
+        >>> output_file_set = j.output_file_set
+
+        :return: :class:`.JobStatus`
         """
-        return RestRequest(JobMonitorApi.job_status) \
+        r = RestRequest(JobMonitorApi.job_status) \
             .with_query({'job_id': self.id}) \
             .with_credentials() \
             .run()
+        self.output_file_set = r['output_file_set']
+        self.job_status = JobStatus.from_str(r['job_status'])
+        return self.job_status
+
+    def get_output_file_set(self):
+        """Get the output file set of the job.
+
+        Notice that this method is only safe when the job in question is
+        submitted and finished. Otherwise it may raise exception.
+
+        The return value only makes sense when the job is successfully
+        finished.
+        """
+        self.status()
+        return self.output_file_set
 
     def wait(self) -> JobStatus:
         """Block until job finish or fail.
+
+        By the way, as wait finishes, the output file set will
+        become available.
+
+        example:
+
+        >>> j = Job.with_attributes({...}).register().run()
+        >>> if j.wait() == JobStatus.FINISHED:
+        >>>     print(j.output_file_set)
+
+        :return: :class:`.JobStatus`
         """
         while 1:
-            status = JobStatus.from_str(self.status()['status'])
+            status = self.status()
             if status in (JobStatus.FINISHED,
                           JobStatus.FAILED,
                           JobStatus.KILLED,
                           JobStatus.CONTAINER_CRASHED,
                           JobStatus.UNKNOWN):
                 break
+            debug('Current status: {}'.format(status))
             time.sleep(10)
         return status
 
@@ -332,7 +381,7 @@ class Job:
         """
         r = OrderedDict()
         [r.update({s: getattr(self, s)}) for s in self.__slots__
-         if hasattr(self, s) and s not in self._blacklist_fields]
+         if hasattr(self, s) and s not in self._blacklist_fields_print]
         return r
 
     @staticmethod
