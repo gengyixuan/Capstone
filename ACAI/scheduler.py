@@ -39,15 +39,16 @@ class Scheduler:
         # Get input data and hyper parameters
         fs.write("inputs=dict()\n")
         for in_node in node.input_nodes:
-            fs.write("inputs['{}']=pkl.load(open('{}.pkl', 'rb'))\n".format(in_node.node_name, in_node.node_name))
+            fs.write("inputs['{}']=pkl.load(open('{}_output/{}.pkl', 'rb'))\n"
+                     .format(in_node.node_name, in_node.node_name, in_node.node_name))
         fs.write("hps=dict()\n")
         for hp in node.hyper_parameter:
             fs.write("hps['{}']=args.{}\n".format(hp['name'], hp['name']))
         # Call function
         fs.write("rst={}(inputs, hps)\n".format(script_name))
         # Save the result
-        fs.write("os.mkdir('{}')\n".format(OUTPUT_PATH))
-        fs.write("pkl.dump(rst, open('{}/{}.pkl', 'wb'))\n".format(OUTPUT_PATH, script_name))
+        fs.write("os.mkdir('{}_output')\n".format(node_name))
+        fs.write("pkl.dump(rst, open('{}_output/{}.pkl', 'wb'))\n".format(node_name, node_name))
         # Compress the script and submit to ACAI system
         fs.close()
         with ZipFile("_{}.zip".format(node_name), "w") as zipf:
@@ -153,7 +154,7 @@ class Scheduler:
             "command": command,
             "container_image": "pytorch/pytorch",
             'input_file_set': input_file_set['id'],
-            'output_path': OUTPUT_PATH,
+            'output_path': "{}_output".format(name),
             'code': '_{}.zip'.format(name),
             'description': 'a job for {}'.format(name),
             'name': name,
