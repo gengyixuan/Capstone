@@ -1,5 +1,5 @@
 pipeline: # Pipeline section, defines pipeline's properties
-    project_name: text_classifier # Name of the pipeline
+    project_name: text_classifier_2 # Name of the pipeline
     admin_token: EmDlCTBF1ppONSciYVd03M9xkmF6hFqW
     user_name: AnalyticsTeam
 
