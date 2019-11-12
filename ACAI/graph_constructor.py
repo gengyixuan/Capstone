@@ -13,7 +13,7 @@ from acaisdk.job import Job
 from acaisdk.meta import *
 from acaisdk.utils import utils
 
-utils.DEBUG = True  # print debug messages
+utils.DEBUG = False  # print debug messages
 
 # class ComputeNode:
 #     def __init__(self, node_name="", script_path="", script_version=0,

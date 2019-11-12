@@ -41,9 +41,8 @@ class LogManager:
         
     def convert_inputs_to_str(self, inputs):
         convert_str = ""
-        for one_tuple in sorted(inputs):
-            input_node_name = one_tuple[0]
-            fileset_version = one_tuple[1]
+        for input_node_name in sorted(inputs):
+            fileset_version = inputs[input_node_name]
             convert_str += str(input_node_name) + self.separator + str(fileset_version) + self.separator
         convert_str = convert_str[0: len(convert_str)-len(self.separator)]
         return convert_str
