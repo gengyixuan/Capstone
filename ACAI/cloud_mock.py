@@ -51,25 +51,25 @@ class Mock(object):
     # create a new process and run the job folder
     # return output fileset:V
     def run_job(self, script, filesets, files, job_name):
-        # TODO: create job folder, update job_versions dict
+        # create job folder, update job_versions dict
         job_version = job_versions[job_name]
         job_versions[job_name] += 1
         job_name_V = job_name + ":" + str(job_version)
         job_folder_path = os.path.join(self.mock_workspace, job_name_V)
         os.mkdir(job_folder_path)
 
+        # add all needed file abs/rel paths into needed_filepaths
         needed_file_abs_paths = []
         needed_file_rel_paths = []
         for file in files + [script]:
             needed_file_rel_paths.append(file)
             needed_file_abs_paths.append(os.path.join(self.user_dir, file))
-        # add all filesets files into needed_filepaths
         for fileset in filesets:
             for relpath in self.list_all_file_paths(fileset):
                 needed_file_rel_paths.append(relpath)
                 needed_file_abs_paths.append(os.path.join(self.mock_dir, relpath))
 
-        # TODO: copy all needed files into job folder
+        # copy all needed files into job folder
         for abspath, relpath in zip(needed_file_abs_paths, needed_file_rel_paths):
             source_path = abspath
             target_path = os.path.join(job_folder_path, relpath)
@@ -90,8 +90,11 @@ class Mock(object):
         #         os.remove(file)
         #     sys.exit()
 
+        # execute script
         # no multi-process version
         with cd(job_folder_path):
             exec(open(script).read())
             for file in needed_file_rel_paths:
                 os.remove(file)
+
+        return job_name_V
