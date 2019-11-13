@@ -4,6 +4,7 @@ import pickle
 import sys
 import shutil
 import collections
+import subprocess
 
 class cd:
     """Context manager for changing the current working directory"""
@@ -52,12 +53,12 @@ class Mock(object):
     # transfer all files needed and the script and the files in filesets into the job folder
     # create a new process and run the job folder
     # return output fileset:V
-    def run_job(self, script, filesets, files, job_name):
+    def run_job(self, script, filesets, files, job_name, command):
         # create job folder, update job_versions dict
         job_version = self.job_versions[job_name]
         self.job_versions[job_name] += 1
         job_name_V = job_name + ":" + str(job_version)
-        job_folder_path = os.path.join(self.mock_workspace, job_name_V)
+        job_folder_path = os.path.join(self.mock_dir, job_name_V)
         os.mkdir(job_folder_path)
 
         # add all needed file abs/rel paths into needed_filepaths
@@ -94,9 +95,14 @@ class Mock(object):
 
         # execute script
         # no multi-process version
-        with cd(job_folder_path):
-            exec(open(script).read())
-            for file in needed_file_rel_paths:
-                os.remove(file)
+        
+        # with cd(job_folder_path):
+        #     exec(open(script).read())
+        #     for file in needed_file_rel_paths:
+        #         os.remove(file)
+        
+        process = subprocess.Popen(command.split(), cwd=job_folder_path, stdout=subprocess.PIPE)
+        output, error = process.communicate()
+
 
         return job_name_V

@@ -1,5 +1,7 @@
 from graph_constructor import GraphConstructor
 from scheduler import Scheduler
+from cloud_mock import Mock
+from constants import *
 import argparse
 
 if __name__ == '__main__':
@@ -17,5 +19,8 @@ if __name__ == '__main__':
     # Begin workflow
     gc = GraphConstructor(workspace)
     graph = gc.load_graph()
-    sc = Scheduler(graph, args.local)
+    mock = None
+    if args.local:
+        mock = Mock(workspace, MOCK_PATH)
+    sc = Scheduler(graph, workspace, mock)
     sc.run_workflow()

@@ -11,11 +11,13 @@ import acaisdk
 
 class Scheduler:
     # graph: list of Node
-    def __init__(self, graph, local=False):
+    def __init__(self, graph, workspace, mock=None):
         self.node_versions = dict()
         self.graph = graph
         self.log_manager = LogManager()
-        self.local = local
+        self.workspace = workspace
+        self.mock = mock
+        self.local = not not mock
         for node in graph:
             self.node_versions[node.node_name] = []
 
@@ -25,7 +27,7 @@ class Scheduler:
         node_name = node.node_name
         script_path = node.script_path[:-3]
         script_name = script_path.split('/')[-1]
-        fs = open("_{}.py".format(node_name), "w")
+        fs = open("{}/_{}.py".format(self.workspace, node_name), "w")
         # Import necessary function & tool
         fs.write("from {} import {}\n".format('.'.join(script_path.split('/')), script_name))
         fs.write("import argparse\n")
@@ -55,9 +57,9 @@ class Scheduler:
 
         if self.local:
             return
-        with ZipFile("_{}.zip".format(node_name), "w") as zipf:
-            zipf.write("_{}.py".format(node_name))
-        acaisdk.file.File.upload([("_{}.zip".format(node_name), "_{}.zip".format(node_name))])
+        with ZipFile("{}/_{}.zip".format(self.workspace, node_name), "w") as zipf:
+            zipf.write("{}/_{}.py".format(self.workspace, node_name))
+        acaisdk.file.File.upload([("{}/_{}.zip".format(self.workspace, node_name), "_{}.zip".format(node_name))])
 
     def run_workflow(self):
         print("Workflow start")
@@ -151,6 +153,7 @@ class Scheduler:
             for dependency in node.dependencies:
                 file_list.append(dependency)
             file_list.append(node.script_path)
+            output_fileset = self.mock.run_job("_{}.py".format(name), fileset_list, file_list, name, command)
         else:
             fileset_list = []
             for in_node in input_nodes:
@@ -177,7 +180,8 @@ class Scheduler:
             if status != acaisdk.job.JobStatus.FINISHED:
                 print(colored("A job for node {} failed!".format(name), "red"))
                 return
-            output_version = job.output_file_set.split(':')[-1]
+            output_fileset = job.output_file_set
+        output_version = output_fileset.split(':')[-1]
         self.add_node_version(node, output_version)
         log_manager.save_output_data(node.node_name, node.script_version, hp, input_nodes, output_version)
 
