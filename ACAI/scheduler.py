@@ -90,9 +90,12 @@ class Scheduler:
             runNode = Thread(target=self.submit_node, args=(q.pop(0), q))
             runNode.start()
             exec_count += 1
+        runNode.join()
         # Delete temporary scripts
         for node in self.graph:
-            os.remove("{}/_{}.py".format(self.workspace, node.node_name))
+            temp_script = "{}/_{}.py".format(self.workspace, node.node_name)
+            if os.path.exists(temp_script):
+                os.remove(temp_script)
 
     # Submit all jobs for target node to ACAI System
     # node: target Node
@@ -121,7 +124,7 @@ class Scheduler:
                         print(colored("Skip the {}/{} job for node {}: Bad common ancestor".format(cur, total, node.node_name), 'blue'))
                     cur += 1
                     continue
-                print(colored("Starting the {}/{} job for node {}".format(cur, total, node.node_name), 'blue'))
+                # print(colored("Starting the {}/{} job for node {}".format(cur, total, node.node_name), 'blue'))
                 if not submitted:
                     self.build_scripts(node)
                     submitted = True
@@ -134,7 +137,7 @@ class Scheduler:
         for j in jobs:
             j.join()
             finish_count += 1
-            print(colored("Finished {}/{} job for node {}".format(finish_count, total, node.node_name), 'blue'))
+            # print(colored("Finished {}/{} job for node {}".format(finish_count, total, node.node_name), 'blue'))
         print(colored("All jobs for node {} finished!".format(node.node_name), 'blue'))
         # After this node is finished, check its descendants
         # for executable nodes (nodes with 0 indegree)
@@ -207,12 +210,14 @@ class Scheduler:
             new_combo_list = []
             for cur_combo in combo_list:
                 if hp['type'] == 'float':
+                    count = int((hp['end'] - hp['start']) / hp['step_size'] + 1)
                     value = hp['start']
-                    while value < hp['end']:
+                    while count > 0:
                         new_hp = cur_combo.copy()
                         new_hp[name] = value
                         new_combo_list.append(new_hp)
                         value += hp['step_size']
+                        count -= 1
                 elif hp['type'] == 'collection':
                     for value in hp['values']:
                         new_hp = cur_combo.copy()
