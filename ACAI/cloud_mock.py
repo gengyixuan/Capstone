@@ -41,7 +41,7 @@ class Mock(object):
         # if dir is a file itself, return [dir]
         path = os.path.join(parent, path)
         if os.path.isfile(path):
-            return [path]
+            return [os.path.relpath(path, start=parent)]
         all_rel_paths = []
         for r, d, f in os.walk(path):
             for file in f:
