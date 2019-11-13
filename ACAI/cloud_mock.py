@@ -37,15 +37,15 @@ class Mock(object):
     # return list of all file paths in dir 
     # path: relative path to workspace
     # returned path is relative path to workspace
-    def list_all_file_paths(self, path):
+    def list_all_file_paths(self, path, parent):
         # if dir is a file itself, return [dir]
-        path = os.path.join(self.mock_dir, path)
+        path = os.path.join(parent, path)
         if os.path.isfile(path):
             return [path]
         all_rel_paths = []
         for r, d, f in os.walk(path):
             for file in f:
-                all_rel_paths.append(os.path.relpath(os.path.join(r, file), start=self.mock_dir))
+                all_rel_paths.append(os.path.relpath(os.path.join(r, file), start=parent))
         return all_rel_paths
 
 
@@ -65,10 +65,11 @@ class Mock(object):
         needed_file_abs_paths = []
         needed_file_rel_paths = []
         for file in files + [script]:
-            needed_file_rel_paths.append(file)
-            needed_file_abs_paths.append(os.path.join(self.user_dir, file))
+            for relpath in self.list_all_file_paths(file, self.user_dir):
+                needed_file_rel_paths.append(relpath)
+                needed_file_abs_paths.append(os.path.join(self.user_dir, relpath))
         for fileset in filesets:
-            for relpath in self.list_all_file_paths(fileset):
+            for relpath in self.list_all_file_paths(fileset, self.mock_dir):
                 needed_file_rel_paths.append(relpath)
                 needed_file_abs_paths.append(os.path.join(self.mock_dir, relpath))
 
@@ -95,7 +96,7 @@ class Mock(object):
 
         # execute script
         # no multi-process version
-        
+
         # with cd(job_folder_path):
         #     exec(open(script).read())
         #     for file in needed_file_rel_paths:
