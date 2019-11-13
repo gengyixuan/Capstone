@@ -79,8 +79,9 @@ class Mock(object):
             for abspath, relpath in zip(needed_file_abs_paths, needed_file_rel_paths):
                 source_path = abspath
                 target_path = os.path.join(job_folder_path, relpath)
-                if not os.path.exists(target_path):
-                    os.makedirs(target_path)
+                target_path_parent = "/".join(target_path.split("/")[:-1])
+                if not os.path.exists(target_path_parent):
+                    os.makedirs(target_path_parent)
                 shutil.copy2(source_path, target_path)
 
             # TODO: create new process and then run script
