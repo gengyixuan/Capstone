@@ -26,7 +26,7 @@ class LogManager:
             pass
 
         # key: <str> Node_name + "\t#\t" + ScriptVersion + "\t#\t" + Inputs
-        # value: (hyper_parameter(dict), OutputFileSetVersion)
+        # value: list of (hyper_parameter(dict), OutputFileSetVersion)
         self.log = {}
         try:
             with open(log_path, 'rb') as input_file:
@@ -86,7 +86,7 @@ class LogManager:
 
 
     # return true if valid
-    # return false is there is invalid ancestors
+    # return false if there is invalid ancestors
     def check_ancestors_hp(self, paths):
         for i in range(0, len(paths)):
             for j in range(i+1, len(paths)):
@@ -120,20 +120,21 @@ class LogManager:
         check_log = self.generate_node_key(node_name, script_version, inputs)
         
         if check_log in self.log:
-            all_match = True
-            hp_dict = self.log[check_log][0]
+            for hp_dict, out_fileset_V in self.log[check_log]:
+                # check if hp_dict all match with hyper_parameters
+                all_match = True
 
-            for one_hp in hyper_parameter:
-                if one_hp not in hp_dict:
-                    all_match = False
-                    break
+                for one_hp in hyper_parameter:
+                    if one_hp not in hp_dict:
+                        all_match = False
+                        break
 
-                if hp_dict[one_hp] != hyper_parameter[one_hp]:
-                    all_match = False
-                    break
-            
-            if all_match:
-                return False, self.log[check_log][1]
+                    if hp_dict[one_hp] != hyper_parameter[one_hp]:
+                        all_match = False
+                        break
+                
+                if all_match:
+                    return False, out_fileset_V
 
         all_paths = self.tracking_ancestors(inputs)
         return self.check_ancestors_hp(all_paths), None
@@ -141,7 +142,7 @@ class LogManager:
 
     def save_output_data(self, node_name, script_version, hyper_parameter, inputs, output_fileset_version):
         log_key = self.generate_node_key(node_name, script_version, inputs)
-        self.log[log_key] = (hyper_parameter, output_fileset_version)
+        self.log[log_key].append( (hyper_parameter, output_fileset_version) )
         
         reverse_log_key = node_name + self.separator + str(output_fileset_version)
         self.reverse_log[reverse_log_key] = inputs
