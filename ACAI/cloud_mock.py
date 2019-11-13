@@ -67,9 +67,10 @@ class Mock(object):
                 needed_file_rel_paths.append(relpath)
                 needed_file_abs_paths.append(os.path.join(self.user_dir, relpath))
         for fileset in filesets:
-            for relpath in self.list_all_file_paths(fileset, self.mock_dir):
+            fileset = os.path.join(self.mock_dir, fileset)
+            for relpath in self.list_all_file_paths(fileset, fileset):
                 needed_file_rel_paths.append(relpath)
-                needed_file_abs_paths.append(os.path.join(self.mock_dir, relpath))
+                needed_file_abs_paths.append(os.path.join(fileset, relpath))
 
         # copy all needed files into job folder
         for abspath, relpath in zip(needed_file_abs_paths, needed_file_rel_paths):
