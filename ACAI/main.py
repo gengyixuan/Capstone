@@ -5,6 +5,7 @@ import argparse
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config", help="Path of the configuration file")
+    parser.add_argument("-l", "--local", default=False, action="store_true", help="Run workflow in local")
     args = parser.parse_args()
 
     # Parse configuration file path
@@ -16,5 +17,5 @@ if __name__ == '__main__':
     # Begin workflow
     gc = GraphConstructor(workspace)
     graph = gc.load_graph()
-    sc = Scheduler(graph)
+    sc = Scheduler(graph, args.local)
     sc.run_workflow()

@@ -2,6 +2,8 @@ from shutil import copyfile
 import os
 import pickle
 import sys
+import shutil
+import collections
 
 class cd:
     """Context manager for changing the current working directory"""
@@ -52,8 +54,8 @@ class Mock(object):
     # return output fileset:V
     def run_job(self, script, filesets, files, job_name):
         # create job folder, update job_versions dict
-        job_version = job_versions[job_name]
-        job_versions[job_name] += 1
+        job_version = self.job_versions[job_name]
+        self.job_versions[job_name] += 1
         job_name_V = job_name + ":" + str(job_version)
         job_folder_path = os.path.join(self.mock_workspace, job_name_V)
         os.mkdir(job_folder_path)

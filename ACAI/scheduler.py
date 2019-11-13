@@ -11,10 +11,11 @@ import acaisdk
 
 class Scheduler:
     # graph: list of Node
-    def __init__(self, graph):
+    def __init__(self, graph, local=False):
         self.node_versions = dict()
         self.graph = graph
         self.log_manager = LogManager()
+        self.local = local
         for node in graph:
             self.node_versions[node.node_name] = []
 
@@ -51,6 +52,9 @@ class Scheduler:
         fs.write("pkl.dump(rst, open('{}_output/{}.pkl', 'wb'))\n".format(node_name, node_name))
         # Compress the script and submit to ACAI system
         fs.close()
+
+        if self.local:
+            return
         with ZipFile("_{}.zip".format(node_name), "w") as zipf:
             zipf.write("_{}.py".format(node_name))
         acaisdk.file.File.upload([("_{}.zip".format(node_name), "_{}.zip".format(node_name))])
@@ -139,33 +143,41 @@ class Scheduler:
         command = "python _{}.py ".format(name)
         for key in hp:
             command += "--{} {} ".format(key, hp[key])
-
-        fileset_list = []
-        for in_node in input_nodes:
-            fileset_list.append("@{}:{}".format(in_node, input_nodes[in_node]))
-        for dependency in node.dependencies:
-            fileset_list.append("{}".format(dependency))
-        fileset_list.append("{}".format(node.script_path))
-        input_file_set = acaisdk.fileset.FileSet.create_file_set("{}_input".format(name), fileset_list)
-        attr = {
-            "v_cpu": "0.5",
-            "memory": "320Mi",
-            "gpu": "0",
-            "command": command,
-            "container_image": "pytorch/pytorch",
-            'input_file_set': input_file_set['id'],
-            'output_path': "{}_output".format(name),
-            'code': '_{}.zip'.format(name),
-            'description': 'a job for {}'.format(name),
-            'name': name,
-            'output_file_set': name
-        }
-        job = acaisdk.job.Job()
-        status = job.with_attributes(attr).register().run().wait()
-        if status != acaisdk.job.JobStatus.FINISHED:
-            print(colored("A job for node {} failed!".format(name), "red"))
-            return
-        output_version = job.output_file_set.split(':')[-1]
+        if self.local:
+            fileset_list = []
+            for in_node in input_nodes:
+                fileset_list.append("{}:{}".format(in_node, input_nodes[in_node]))
+            file_list = []
+            for dependency in node.dependencies:
+                file_list.append(dependency)
+            file_list.append(node.script_path)
+        else:
+            fileset_list = []
+            for in_node in input_nodes:
+                fileset_list.append("@{}:{}".format(in_node, input_nodes[in_node]))
+            for dependency in node.dependencies:
+                fileset_list.append(dependency)
+            fileset_list.append(node.script_path)
+            input_file_set = acaisdk.fileset.FileSet.create_file_set("{}_input".format(name), fileset_list)
+            attr = {
+                "v_cpu": "0.5",
+                "memory": "320Mi",
+                "gpu": "0",
+                "command": command,
+                "container_image": "pytorch/pytorch",
+                'input_file_set': input_file_set['id'],
+                'output_path': "{}_output".format(name),
+                'code': '_{}.zip'.format(name),
+                'description': 'a job for {}'.format(name),
+                'name': name,
+                'output_file_set': name
+            }
+            job = acaisdk.job.Job()
+            status = job.with_attributes(attr).register().run().wait()
+            if status != acaisdk.job.JobStatus.FINISHED:
+                print(colored("A job for node {} failed!".format(name), "red"))
+                return
+            output_version = job.output_file_set.split(':')[-1]
         self.add_node_version(node, output_version)
         log_manager.save_output_data(node.node_name, node.script_version, hp, input_nodes, output_version)
 
