@@ -141,7 +141,10 @@ class LogManager:
 
     def save_output_data(self, node_name, script_version, hyper_parameter, inputs, output_fileset_version):
         log_key = self.generate_node_key(node_name, script_version, inputs)
-        self.log[log_key].append( (hyper_parameter, output_fileset_version) )
+        if log_key in self.log:
+            self.log[log_key].append( (hyper_parameter, output_fileset_version) )
+        else:
+            self.log[log_key] = [(hyper_parameter, output_fileset_version)]
         
         reverse_log_key = node_name + self.separator + str(output_fileset_version)
         self.reverse_log[reverse_log_key] = inputs
