@@ -1,5 +1,5 @@
 import time
-import sys
+import os
 from threading import Thread
 from zipfile import ZipFile
 from termcolor import colored
@@ -28,11 +28,13 @@ class Scheduler:
         script_path = node.script_path[:-3]
         script_name = script_path.split('/')[-1]
         fs = open("{}/_{}.py".format(self.workspace, node_name), "w")
+
         # Import necessary function & tool
         fs.write("from {} import {}\n".format('.'.join(script_path.split('/')), script_name))
         fs.write("import argparse\n")
         fs.write("import pickle as pkl\n")
         fs.write("import os\n")
+
         # Build argument parser
         fs.write("parser=argparse.ArgumentParser()\n")
         for hp in node.hyper_parameter:
@@ -88,6 +90,9 @@ class Scheduler:
             runNode = Thread(target=self.submit_node, args=(q.pop(0), q))
             runNode.start()
             exec_count += 1
+        # Delete temporary scripts
+        for node in self.graph:
+            os.remove("{}/_{}.py".format(self.workspace, node.node_name))
 
     # Submit all jobs for target node to ACAI System
     # node: target Node
@@ -125,8 +130,11 @@ class Scheduler:
                 jobs.append(runJob)
                 cur += 1
         # Waiting for all jobs to finish
+        finish_count = 0
         for j in jobs:
             j.join()
+            finish_count += 1
+            print(colored("Finished {}/{} job for node {}".format(finish_count, total, node.node_name), 'blue'))
         print(colored("All jobs for node {} finished!".format(node.node_name), 'blue'))
         # After this node is finished, check its descendants
         # for executable nodes (nodes with 0 indegree)
@@ -142,7 +150,7 @@ class Scheduler:
     def submit_job(self, node, hp, input_nodes, log_manager):
         name = node.node_name
         # Build command
-        command = "python _{}.py ".format(name)
+        command = "python3 _{}.py ".format(name)
         for key in hp:
             command += "--{} {} ".format(key, hp[key])
         if self.local:

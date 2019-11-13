@@ -32,7 +32,6 @@ modules:
                 values: # Possible vaules for collection param
                     - 1000
                     - 2000
-                    - 5000
 
     -   node: append2 # Name of the module
         script: src/append2.py
@@ -44,7 +43,6 @@ modules:
                 values: # Possible vaules for collection param
                     - -1000
                     - -2000
-                    - -5000
 
     -   node: writer
         script: src/writer.py
@@ -56,7 +54,7 @@ modules:
                 type: float
                 start: -1.0
                 end: 0.0
-                step_size: 0.3
+                step_size: 2.0
 
             -   name: classifier
                 type: collection # Type of the param, int, float or collection
