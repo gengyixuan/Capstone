@@ -16,7 +16,7 @@ class ConditionType(Enum):
 
 
 class Condition:
-    """Constrains to apply when filtering out jobs, files and
+    """Constraints to apply when filtering out jobs, files and
     file sets.
 
     Example: find the job output of the best performing CNN model by
@@ -37,6 +37,7 @@ class Condition:
         self.key = key
         self.val = None
         self.type = None
+        self.is_regex = False
 
     def value(self, val) -> 'Condition':
         """Find entity with value equals :code:`val`
@@ -65,12 +66,18 @@ class Condition:
         self.val = [start, end]
         return self
 
-    def array(self, array: Iterable) -> 'Condition':
-        """Find entity with values matching every value in the input array.
-        Which implies that the metadata value must be of array type.
+    def re(self) -> 'Condition':
+        """Query with a regular expression instead of exact string mapping.
+
+        Only effective when the condition type is "value" and value is string.
+
+        .. code-block:: python
+
+            Condition('model').value('c.*n').re()
+
         """
-        self.type = ConditionType.ARRAY
-        self.val = list(array)
+        if self.type == ConditionType.VALUE and type(self.val) == str:
+            self.is_regex = True
         return self
 
     def to_dict(self):
@@ -80,6 +87,8 @@ class Condition:
         }
         if self.val:
             d['value'] = self.val
+        if self.is_regex:
+            d['re'] = self.is_regex
         return d
 
     def __repr__(self):
@@ -108,9 +117,9 @@ class Meta:
                                 ''.format(r['id']))
         explicit_path = r['id']
 
-        tags = [] if not tags else tags
         kv_pairs = {} if not kv_pairs else kv_pairs
-        kv_pairs['tags'] = kv_pairs.get('tags', tags)
+        if tags:
+            kv_pairs['tags'] = kv_pairs.get('tags', tags)
 
         data = {'id': explicit_path,
                 'meta': kv_pairs}
@@ -126,13 +135,13 @@ class Meta:
                              kv_pairs: dict = None):
         """Same usage as :py:meth:`~Meta.update_file_meta`"""
         # Resolve the potentially vague name to explicit name
-        r = fileset.FileSet.resolve_vague_name(file_set)
+        r = fileset.FileSet.list_file_set_content(file_set)
 
         explicit_name = r['id']
 
-        tags = [] if not tags else tags
         kv_pairs = {} if not kv_pairs else kv_pairs
-        kv_pairs['tags'] = kv_pairs.get('tags', tags)
+        if tags:
+            kv_pairs['tags'] = kv_pairs.get('tags', tags)
 
         data = {'id': explicit_name,
                 'meta': kv_pairs}
@@ -147,9 +156,9 @@ class Meta:
                         tags: list = None,
                         kv_pairs: dict = None):
         """Same usage as :py:meth:`~Meta.update_file_meta`"""
-        tags = [] if not tags else tags
         kv_pairs = {} if not kv_pairs else kv_pairs
-        kv_pairs['tags'] = kv_pairs.get('tags', tags)
+        if tags:
+            kv_pairs['tags'] = kv_pairs.get('tags', tags)
 
         data = {'id': job_id,
                 'meta': kv_pairs}
@@ -201,6 +210,9 @@ class Meta:
         if entity_type.lower() not in ('file', 'job', 'fileset'):
             raise AcaiException('Entity type must be one of: '
                                 '("File", "Job", "FileSet")')
+
+        Meta._validate_query(*conditions)
+
         data = {
             "entity_type": entity_type.lower(),
             "conditions": [c.to_dict() for c in conditions]
@@ -210,6 +222,34 @@ class Meta:
             .with_credentials() \
             .run()
 
+    @staticmethod
+    def _validate_query(*conditions: Condition):
+        max_count = 0
+        min_count = 0
+        keys = set()
+        for c in conditions:
+            # No duplicate keys
+            if c.key not in keys:
+                keys.add(c.key)
+            else:
+                _msg = 'Duplicated search key: {}'.format(c.key)
+                raise AcaiException(_msg)
+
+            # Type-specific requirements.
+            if c.type == ConditionType.MIN:
+                min_count += 1
+            elif c.type == ConditionType.MAX:
+                max_count += 1
+            elif c.type == ConditionType.RANGE:
+                if (type(c.val[0]) not in (int, float) or
+                        type(c.val[1]) not in (int, float)):
+                    _msg = 'Range query start and end value must be numbers'
+                    raise AcaiException(_msg)
+        if max_count * min_count != 0:
+            _msg = 'Cannot specify max and min at the same time.'
+            raise AcaiException(_msg)
+
+    # === GET ===
     @staticmethod
     def get_file_meta(*file_list):
         """Get the metadata for a list of files.
@@ -251,6 +291,40 @@ class Meta:
         data = {
             'type': 'file',
             'ids': resolved_paths
+        }
+        return RestRequest(MetadataApi.get_meta) \
+            .with_data(data) \
+            .with_credentials() \
+            .run()
+
+    @staticmethod
+    def get_file_set_meta(*file_set_list):
+        """Same as :py:meth:`get_file_meta()`
+        """
+        # Resolve vague paths
+        resolved_names = []
+        for fs in file_set_list:
+            r = fileset.FileSet.list_file_set_content(fs)
+            resolved_names.append(r['id'])
+        # Get meta data
+        data = {
+            'type': 'fileset',
+            'ids': resolved_names
+        }
+        return RestRequest(MetadataApi.get_meta) \
+            .with_data(data) \
+            .with_credentials() \
+            .run()
+
+    @staticmethod
+    def get_job_meta(*jobid_list):
+        """Same as :py:meth:`get_file_meta()`
+        """
+        # Resolve vague paths
+        # Get meta data
+        data = {
+            'type': 'job',
+            'ids': jobid_list
         }
         return RestRequest(MetadataApi.get_meta) \
             .with_data(data) \

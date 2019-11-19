@@ -62,53 +62,53 @@ class Mock(object):
             # create job folder, update job_versions dict
             job_version = self.job_versions[job_name]
             self.job_versions[job_name] += 1
-            job_name_V = job_name + ":" + str(job_version)
-            job_folder_path = os.path.join(self.mock_dir, job_name_V)
-            os.mkdir(job_folder_path)
+        job_name_V = job_name + ":" + str(job_version)
+        job_folder_path = os.path.join(self.mock_dir, job_name_V)
+        os.mkdir(job_folder_path)
 
-            # add all needed file abs/rel paths into needed_filepaths
-            needed_file_abs_paths = []
-            needed_file_rel_paths = []
-            for file in files + [script]:
-                for relpath in self.list_all_file_paths(file, self.user_dir):
-                    needed_file_rel_paths.append(relpath)
-                    needed_file_abs_paths.append(os.path.join(self.user_dir, relpath))
-            for fileset in filesets:
-                fileset = os.path.join(self.mock_dir, fileset)
-                for relpath in self.list_all_file_paths('./', fileset):
-                    needed_file_rel_paths.append(relpath)
-                    needed_file_abs_paths.append(os.path.join(fileset, relpath))
+        # add all needed file abs/rel paths into needed_filepaths
+        needed_file_abs_paths = []
+        needed_file_rel_paths = []
+        for file in files + [script]:
+            for relpath in self.list_all_file_paths(file, self.user_dir):
+                needed_file_rel_paths.append(relpath)
+                needed_file_abs_paths.append(os.path.join(self.user_dir, relpath))
+        for fileset in filesets:
+            fileset = os.path.join(self.mock_dir, fileset)
+            for relpath in self.list_all_file_paths('./', fileset):
+                needed_file_rel_paths.append(relpath)
+                needed_file_abs_paths.append(os.path.join(fileset, relpath))
 
-            # copy all needed files into job folder
-            for abspath, relpath in zip(needed_file_abs_paths, needed_file_rel_paths):
-                source_path = abspath
-                target_path = os.path.join(job_folder_path, relpath)
-                target_path_parent = "/".join(target_path.split("/")[:-1])
-                if not os.path.exists(target_path_parent):
-                    os.makedirs(target_path_parent)
-                shutil.copy2(source_path, target_path)
+        # copy all needed files into job folder
+        for abspath, relpath in zip(needed_file_abs_paths, needed_file_rel_paths):
+            source_path = abspath
+            target_path = os.path.join(job_folder_path, relpath)
+            target_path_parent = "/".join(target_path.split("/")[:-1])
+            if not os.path.exists(target_path_parent):
+                os.makedirs(target_path_parent)
+            shutil.copy2(source_path, target_path)
 
-            # TODO: create new process and then run script
-            # pid=os.fork()
-            # if pid:
-            #     # parent
-            #     return job_name_V  
-            # else:
-            #     # child
-            #     os.chdir(job_folder_path)
-            #     exec(open(script).read())
-            #     for file in needed_file_rel_paths:
-            #         os.remove(file)
-            #     sys.exit()
+        # TODO: create new process and then run script
+        # pid=os.fork()
+        # if pid:
+        #     # parent
+        #     return job_name_V  
+        # else:
+        #     # child
+        #     os.chdir(job_folder_path)
+        #     exec(open(script).read())
+        #     for file in needed_file_rel_paths:
+        #         os.remove(file)
+        #     sys.exit()
 
-            # execute script
-            # no multi-process version
+        # execute script
+        # no multi-process version
 
-            process = subprocess.Popen(command.split(), cwd=job_folder_path, stdout=subprocess.PIPE)
-            output, error = process.communicate()
+        process = subprocess.Popen(command.split(), cwd=job_folder_path, stdout=subprocess.PIPE)
+        output, error = process.communicate()
 
-            with cd(job_folder_path):
-                for file in needed_file_rel_paths:
-                    os.remove(file)
+        with cd(job_folder_path):
+            for file in needed_file_rel_paths:
+                os.remove(file)
 
         return job_name_V
