@@ -107,8 +107,7 @@ class Mock(object):
         process = subprocess.Popen(command.split(), cwd=job_folder_path, stdout=subprocess.PIPE)
         output, error = process.communicate()
 
-        with cd(job_folder_path):
-            for file in needed_file_rel_paths:
-                os.remove(file)
+        for file in needed_file_rel_paths:
+            os.remove(os.path.join(job_folder_path, file))
 
         return job_name_V
