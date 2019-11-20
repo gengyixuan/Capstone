@@ -19,6 +19,8 @@ if __name__ == '__main__':
     conf_name = conf_path[name_index+1:]
     workspace = conf_path[:name_index+1]
 
+    print("workspace: "+workspace)
+
     # Begin workflow
     gc = GraphConstructor(workspace)
     graph = gc.load_graph()
