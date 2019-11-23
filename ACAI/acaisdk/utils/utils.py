@@ -4,6 +4,7 @@ IS_CLI = False
 
 DEBUG = os.environ.get('ACAI_DEBUG', '').lower() in ('1', 'true', 'T')
 
+
 def bytes_to_size(size):
     """Convert size in bytes into human readable string.
 

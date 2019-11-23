@@ -1,5 +1,6 @@
 import time
 import os
+import sys
 from threading import Thread
 from zipfile import ZipFile
 from termcolor import colored
@@ -27,7 +28,9 @@ class Scheduler:
         node_name = node.node_name
         script_path = node.script_path[:-3]
         script_name = script_path.split('/')[-1]
-        fs = open("{}/_{}.py".format(self.workspace, node_name), "w")
+        local_generated_script_name = "{}_{}.py".format(self.workspace, node_name)
+        cloud_generated_script_name = "_{}.py".format(node_name)
+        fs = open(local_generated_script_name, "w")
 
         # Import necessary function & tool
         fs.write("from {} import {}\n".format('.'.join(script_path.split('/')), script_name))
@@ -52,16 +55,20 @@ class Scheduler:
         # Call function
         fs.write("rst={}(inputs, hps)\n".format(script_name))
         # Save the result
-        fs.write("os.mkdir('{}_output')\n".format(node_name))
+        #fs.write("os.mkdir('{}_output')\n".format(node_name))
         fs.write("pkl.dump(rst, open('{}_output/{}.pkl', 'wb'))\n".format(node_name, node_name))
         # Compress the script and submit to ACAI system
         fs.close()
 
         if self.local:
             return
-        with ZipFile("{}/_{}.zip".format(self.workspace, node_name), "w") as zipf:
-            zipf.write("{}/_{}.py".format(self.workspace, node_name))
-        acaisdk.file.File.upload([("{}/_{}.zip".format(self.workspace, node_name), "_{}.zip".format(node_name))])
+        # zip generated script and upload
+        local_zip_filename = "{}_{}.zip".format(self.workspace, node_name)
+        cloud_zip_filename = "_{}.zip".format(node_name)
+        print(local_generated_script_name, cloud_generated_script_name, local_zip_filename, cloud_zip_filename)
+        with ZipFile(local_zip_filename, "w") as zipf:
+            zipf.write(local_generated_script_name, cloud_generated_script_name)
+        acaisdk.file.File.upload([(local_zip_filename, cloud_zip_filename)])
 
     def run_workflow(self):
         print("Workflow start")
@@ -93,7 +100,7 @@ class Scheduler:
         runNode.join()
         # Delete temporary scripts
         for node in self.graph:
-            temp_script = "{}/_{}.py".format(self.workspace, node.node_name)
+            temp_script = "{}_{}.py".format(self.workspace, node.node_name)
             if os.path.exists(temp_script):
                 os.remove(temp_script)
 

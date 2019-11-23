@@ -4,7 +4,7 @@ from acaisdk import configs
 from acaisdk.utils import rest_utils
 from acaisdk.utils.utils import *
 from acaisdk.utils.exceptions import *
-from acaisdk.credentials import get_credentials
+from acaisdk.credentials import get_credentials, has_logged_in
 import json
 
 E = namedtuple('E', ['id', 'method'])
@@ -88,7 +88,7 @@ class JobSchedulerApi(Services):
 
 
 class JobMonitorApi(Services):
-    job_status = EnumFactory.GET()
+    job_status = EnumFactory.POST()
 
 
 class MetadataApi(Services):
@@ -137,6 +137,11 @@ class RestRequest:
             self.credentials = get_credentials()
         else:
             self.credentials = credentials
+
+        if not has_logged_in(self.credentials):
+            _msg = 'You have not logged in to ACAI'
+            raise AcaiException(_msg)
+
         return self
 
     def run(self):
