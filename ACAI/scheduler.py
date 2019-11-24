@@ -26,7 +26,7 @@ class Scheduler:
             self.node_versions[node.node_name] = []
 
     # Build script files for each user-provided function
-    # by adding input and output processer
+    # by adding input and output procedure
     def build_scripts(self, node):
         node_name = node.node_name
         script_path = node.script_path[:-3]
@@ -58,7 +58,7 @@ class Scheduler:
         # Call function
         fs.write("rst={}(inputs, hps)\n".format(script_name))
         # Save the result
-        #fs.write("os.mkdir('{}_output')\n".format(node_name))
+        # fs.write("os.mkdir('{}_output')\n".format(node_name))
         fs.write("pkl.dump(rst, open('{}_output/{}.pkl', 'wb'))\n".format(node_name, node_name))
         # Compress the script and submit to ACAI system
         fs.close()
