@@ -1,4 +1,5 @@
 import copy
+import os
 import pickle
 from utils import Node
 from constants import *
@@ -6,6 +7,12 @@ from constants import *
 class LogManager:
     def __init__(self, reverse_log_path=REVERSE_LOG_PATH, fileset_hp_path=FILESET_HP_PATH, log_path=LOG_PATH):
         self.separator = "\t#\t"
+        
+        tmp_list = reverse_log_path.split('/')
+        meta_data_workspace = tmp_list[0] + '/' + tmp_list[1]
+
+        if not os.path.exists(meta_data_workspace):
+            os.mkdir(meta_data_workspace)
         
         # Key: <str> NodeName + "\t#\t" + FileSetVersion
         # val: [(InputNodeName, FileSetVersion)]
