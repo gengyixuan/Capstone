@@ -27,7 +27,7 @@ if __name__ == '__main__':
     mock = None
     if args.local:
         mock = Mock(workspace, MOCK_PATH)
-    sc = Scheduler(graph, workspace, 'bayesian', mock)
+    sc = Scheduler(graph, workspace, 'grid', mock)
     sc.run_workflow()
     end = time.time()
 
