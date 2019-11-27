@@ -22,7 +22,7 @@ if __name__ == '__main__':
     print("workspace: "+workspace)
 
     # Begin workflow
-    gc = GraphConstructor(workspace)
+    gc = GraphConstructor(workspace, args.local)
     graph = gc.load_graph()
     mock = None
     if args.local:

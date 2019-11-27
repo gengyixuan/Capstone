@@ -50,8 +50,9 @@ utils.DEBUG = False  # print debug messages
 #     print(node.toStr())
 
 class GraphConstructor(object):
-    def __init__(self, workspace):
+    def __init__(self, workspace, local_mode):
         self.workspace = workspace
+        self.local_mode = local_mode
 
     # return list of all file paths in dir 
     # path: relative path to workspace
@@ -137,11 +138,12 @@ class GraphConstructor(object):
 
 
         # for a file that is both needed for current run and has been modified from last snapshot, upload it
-        for needed_file in needed:
-            if needed_file in modified:
-                input_dir = os.path.join(self.workspace, needed_file)
-                print("uploading: "+needed_file)
-                File.upload([(input_dir, needed_file)], []).as_new_file_set(needed_file)
+        if not self.local_mode:    
+            for needed_file in needed:
+                if needed_file in modified:
+                    input_dir = os.path.join(self.workspace, needed_file)
+                    print("uploading: "+needed_file)
+                    File.upload([(input_dir, needed_file)], []).as_new_file_set(needed_file)
 
         # load script versions to prepare for subsequent stage of generating "compute nodes"
         # note that a script version is dependent on both script file version and dependent file versions

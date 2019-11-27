@@ -55,7 +55,7 @@ class Scheduler:
         # Call function
         fs.write("rst={}(inputs, hps)\n".format(script_name))
         # Save the result
-        #fs.write("os.mkdir('{}_output')\n".format(node_name))
+        fs.write("os.mkdir('{}_output')\n".format(node_name))
         fs.write("pkl.dump(rst, open('{}_output/{}.pkl', 'wb'))\n".format(node_name, node_name))
         # Compress the script and submit to ACAI system
         fs.close()
