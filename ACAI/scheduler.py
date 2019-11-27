@@ -7,23 +7,26 @@ from termcolor import colored
 
 from log_manager import LogManager
 from constants import *
+from searcher import Searcher
 import acaisdk
 
 
 class Scheduler:
     # graph: list of Node
-    def __init__(self, graph, workspace, mock=None):
+    def __init__(self, graph, workspace, search_method='grid', mock=None):
         self.node_versions = dict()
         self.graph = graph
         self.log_manager = LogManager()
         self.workspace = workspace
         self.mock = mock
         self.local = not not mock
+        self.search_method = search_method
+        self.searcher = None
         for node in graph:
             self.node_versions[node.node_name] = []
 
     # Build script files for each user-provided function
-    # by adding input and output processer
+    # by adding input and output procedure
     def build_scripts(self, node):
         node_name = node.node_name
         script_path = node.script_path[:-3]
@@ -55,7 +58,8 @@ class Scheduler:
         # Call function
         fs.write("rst={}(inputs, hps)\n".format(script_name))
         # Save the result
-        fs.write("os.mkdir('{}_output')\n".format(node_name))
+        fs.write("if not os.path.exists('{}_output'):\n".format(node_name))
+        fs.write("\tos.mkdir('{}_output')\n".format(node_name))
         fs.write("pkl.dump(rst, open('{}_output/{}.pkl', 'wb'))\n".format(node_name, node_name))
         # Compress the script and submit to ACAI system
         fs.close()
@@ -72,13 +76,19 @@ class Scheduler:
 
     def run_workflow(self):
         print("Workflow start")
-        # Build graph for topological sort
-        # for node in self.graph:
-        #     node.input_nodes_num = len(node.input_nodes)
-        #     for pre in node.input_nodes:
-        #         pre.output_nodes.append(node)
+        if self.search_method == 'grid':
+            self.run_workflow_grid()
+        else:
+            self.searcher = Searcher(self.graph, self.search_method)
+            self.run_workflow_optim()
+        # Delete temporary scripts
+        for node in self.graph:
+            temp_script = "{}_{}.py".format(self.workspace, node.node_name)
+            if os.path.exists(temp_script):
+                os.remove(temp_script)
 
-        # Execute nodes with zero indegree
+    def run_workflow_grid(self):
+        # Execute nodes with zero in-degree
         q = []
         for node in self.graph:
             if node.input_nodes_num == 0:
@@ -94,15 +104,52 @@ class Scheduler:
             while not q:
                 time.sleep(SLEEP_INTERVAL)
             # Submit current node for execution in a new thread
-            runNode = Thread(target=self.submit_node, args=(q.pop(0), q))
-            runNode.start()
+            run_node = Thread(target=self.submit_node, args=(q.pop(0), q))
+            run_node.start()
             exec_count += 1
-        runNode.join()
-        # Delete temporary scripts
-        for node in self.graph:
-            temp_script = "{}_{}.py".format(self.workspace, node.node_name)
-            if os.path.exists(temp_script):
-                os.remove(temp_script)
+        run_node.join()
+
+    def run_workflow_optim(self):
+        last_rst = None
+        hps = None
+        best_rst = None
+        no_improve_count = 0
+        max_no_improve_count = 10
+        count = 1
+        while no_improve_count < max_no_improve_count:
+            print(colored("Starting round {} of hyper parameter search...".format(count), 'blue'))
+            hps = self.searcher.get_next_hps(hps, last_rst)
+            # Reset in-degree for each node
+            for node in self.graph:
+                node.input_nodes_num = len(node.input_nodes)
+                for pre in node.input_nodes:
+                    pre.output_nodes.append(node)
+            # Execute nodes with zero indegree
+            q = []
+            for node in self.graph:
+                if node.input_nodes_num == 0:
+                    q.append(node)
+            # Count the number of executed nodes
+            exec_count = 0
+            # Keep looping until all nodes are executed
+            while exec_count < len(self.graph):
+                if not q:
+                    print(colored("No runnable nodes now. Waiting...", 'green'))
+                # Constantly check if new nodes are added to the queue
+                while not q:
+                    time.sleep(SLEEP_INTERVAL)
+                # Submit current node for execution in a new thread
+                run_node = Thread(target=self.submit_node_optim, args=(q.pop(0), q, hps))
+                run_node.start()
+                exec_count += 1
+            run_node.join()
+            # TODO: get results
+            last_rst = self.get_result()
+            if not best_rst or self.compare(last_rst, best_rst):
+                best_rst = last_rst
+                no_improve_count = 0
+            else:
+                no_improve_count += 1
 
     # Submit all jobs for target node to ACAI System
     # node: target Node
@@ -135,9 +182,9 @@ class Scheduler:
                 if not submitted:
                     self.build_scripts(node)
                     submitted = True
-                runJob = Thread(target=self.submit_job, args=(node, hp, input_nodes, self.log_manager))
-                runJob.start()
-                jobs.append(runJob)
+                run_job = Thread(target=self.submit_job, args=(node, hp, input_nodes))
+                run_job.start()
+                jobs.append(run_job)
                 cur += 1
         # Waiting for all jobs to finish
         finish_count = 0
@@ -153,11 +200,27 @@ class Scheduler:
             if out.input_nodes_num == 0:
                 q.append(out)
 
+    # Submit one job specified by the hyper parameter setting to ACAI system
+    # node: target Node
+    # q: Queue of Nodes
+    # hps: hyper parameter setting
+    def submit_node_optim(self, node, q, hps):
+        input_nodes_ver = {}
+        for pre in node.input_nodes:
+            input_nodes_ver[pre.node_name] = pre.last_ver
+        self.submit_job(node, hps[node.node_name], input_nodes_ver)
+        # After this node is finished, check its descendants
+        # for executable nodes (nodes with 0 in-degree)
+        for out in node.output_nodes:
+            out.input_nodes_num -= 1
+            if out.input_nodes_num == 0:
+                q.append(out)
+
     # Submit a job to ACAI System
     # node: target Node
     # hp: hyper parameter setting for this job
     # input_nodes: input node versions for this job
-    def submit_job(self, node, hp, input_nodes, log_manager):
+    def submit_job(self, node, hp, input_nodes):
         name = node.node_name
         # Build command
         command = "python3 _{}.py ".format(name)
@@ -201,10 +264,11 @@ class Scheduler:
             output_fileset = job.output_file_set
         output_version = output_fileset.split(':')[-1]
         self.add_node_version(node, output_version)
-        log_manager.save_output_data(node.node_name, node.script_version, hp, input_nodes, output_version)
+        self.log_manager.save_output_data(node.node_name, node.script_version, hp, input_nodes, output_version)
 
     def add_node_version(self, node, version):
         name = node.node_name
+        node.last_ver = version
         self.node_versions[name].append(version)
 
     # Get all possible hyper parameter settings
