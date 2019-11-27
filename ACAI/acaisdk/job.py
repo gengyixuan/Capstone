@@ -7,6 +7,7 @@ from acaisdk.fileset import FileSet
 from typing import Union, Tuple, List, Dict
 from pprint import pformat
 import time
+import threading
 
 
 class JobStatus(Enum):
@@ -158,6 +159,7 @@ class Job:
         'registered',
         'submitted'
     ]
+    __lock = threading.Lock()
 
     def __init__(self):
         self.registered = False
@@ -188,25 +190,30 @@ class Job:
         # debug(r)
         return self
 
-    def run(self) -> 'Job':
+    def run(self, force_sequential=False) -> 'Job':
         """Execute registered job."""
         self._validate()
+        if force_sequential:
+            Job.__lock.acquire()
+        try:
+            # use full id of input file set
+            self.input_file_set = \
+                FileSet.list_file_set_content(self.input_file_set)['id']
 
-        # use full id of input file set
-        self.input_file_set = \
-            FileSet.list_file_set_content(self.input_file_set)['id']
+            data = {k: v for k, v in self.dict.items()
+                    if k not in self._blacklist_fields_submit}
 
-        data = {k: v for k, v in self.dict.items()
-                if k not in self._blacklist_fields_submit}
-
-        r = RestRequest(JobRegistryApi.new_job) \
-            .with_data(data) \
-            .with_credentials() \
-            .run()
-        self.with_attributes(r['job'])
-        self.submitted = True
-        debug(r)
-        return self
+            r = RestRequest(JobRegistryApi.new_job) \
+                .with_data(data) \
+                .with_credentials() \
+                .run()
+            self.with_attributes(r['job'])
+            self.submitted = True
+            debug(r)
+            return self
+        finally:
+            if force_sequential:
+                Job.__lock.release()
 
     def _validate(self):
         fields_not_set = [f for f in self._required_fields
@@ -348,7 +355,7 @@ class Job:
         self.status()
         return self.output_file_set
 
-    def wait(self) -> JobStatus:
+    def wait(self, first_sleep=10, subsequent_sleeps=10) -> JobStatus:
         """Block until job finish or fail.
 
         By the way, as wait finishes, the output file set will
@@ -362,6 +369,10 @@ class Job:
 
         :return: :class:`.JobStatus`
         """
+        first_sleep = max(10, first_sleep)
+        subsequent_sleeps = max(10, subsequent_sleeps)  # This is f-ing dirty
+
+        time.sleep(first_sleep)
         while 1:
             status = self.status()
             if status in (JobStatus.FINISHED,
@@ -371,8 +382,24 @@ class Job:
                           JobStatus.UNKNOWN):
                 break
             debug('Current status: {}'.format(status))
-            time.sleep(10)
+            time.sleep(subsequent_sleeps)
+
         return status
+
+    def get_log(self) -> dict:
+        """Get log of the job
+
+        :return
+
+            .. code-block:: python
+
+                {'jobId': 2404, 'log': "hello world"}
+
+        """
+        return RestRequest(LogServerApi.get_job_log) \
+            .with_query({'job_id': self.id}) \
+            .with_credentials() \
+            .run()
 
     @property
     def dict(self) -> OrderedDict:
@@ -440,3 +467,119 @@ class ProfilingJob(object):
 
         return {s: _object_to_dict(getattr(self, s))
                 for s in self.__slots__ if hasattr(self, s)}
+
+
+class AutoProvisioner(object):
+    __slots__ = [
+        'name',
+        'description',
+        'template_id',
+        'parameters',
+        'output_path',
+        'output_file_set',
+        'max_time',
+        'max_cost',
+        'optimize',
+        'job',
+
+        'submitted',
+        'expected_time',
+        'expected_cost'  # TODO
+    ]
+
+    _required_fields = [
+        'name',
+        'template_id',
+        'parameters',
+        'output_path',
+        'output_file_set',
+        'max_time',
+        'max_cost',
+        'optimize',
+    ]
+
+    _blacklist_fields_submit = [
+        'job'
+    ]
+
+    _name_remap = {
+        'output_path': 'output_folder'
+    }
+
+    def with_attributes(self, d: dict) -> 'AutoProvisioner':
+        """Fill AutoProvisioner object with attributes.
+
+        :param d: Dict of attributes.
+        :return: Updated object.
+        """
+        [setattr(self, self._name_remap.get(k, k), v)
+         for k, v in d.items() if k in self.__slots__]
+
+        self.optimize = self.optimize.lower()
+
+        return self
+
+    def _validate(self):
+        fields_not_set = [f for f in self._required_fields
+                          if not hasattr(self, f)]
+        if fields_not_set:
+            _msg = 'Fields not set when submitting job: ' \
+                   '{}'.format(fields_not_set)
+            raise ArgError(_msg)
+        if self.optimize.lower() not in ('time', 'cost'):
+            _msg = '"optimize" has to be "time" or "cost".'
+            raise ArgError(_msg)
+
+    @property
+    def dict(self) -> OrderedDict:
+        """Get a dictionary representation of the object.
+        """
+        r = OrderedDict()
+        [r.update({s: getattr(self, s)}) for s in self.__slots__
+         if hasattr(self, s)]
+        return r
+
+    def provision(self, result_dict: dict = None) -> bool:
+        """Run a auto-provisioned job.
+
+        If a job has been successfully scheduled, you can use
+
+        .. code-block:: python
+
+            if ap.provision():
+                job = ap.job
+
+        to get the class:`.job.Job` object for the scheduled job and
+        use methods in the class:`.job.Job` class to manage the job.
+
+        :param result_dict:
+            You can send in an empty dictionary so that response JSON from the
+            API call can be filled in it. Otherwise the response will be
+            discarded.
+
+        :return:
+            If an actual job has been submitted. E.g. if provided cost or time
+            requirement is too strict, ACAI may not be able to schedule a job
+            based on the requirement and the return value of this method would
+            be `False`.
+        """
+        self._validate()
+
+        data = {k: v for k, v in self.dict.items()
+                if k not in self._blacklist_fields_submit}
+
+        r = RestRequest(AutoProvisionerApi.new_job) \
+            .with_data(data) \
+            .with_credentials() \
+            .run()
+
+        debug(r)
+        success = r['success']
+
+        if success:
+            self.job = Job().with_attributes(r['submission']['job'])
+
+        if result_dict is not None:
+            result_dict.update(r)
+
+        return success

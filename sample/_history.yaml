@@ -1,0 +1,44 @@
+credentials:
+  ACAI_PROJECT: analytics_toytest_37
+  ACAI_TOKEN: db6z5ZgLroOzOun1tHnVrrgpI4GWH1s4
+file_versions:
+  config.yaml:
+    time: '1574893341.732461'
+    version: 0
+  data1/file1.txt:
+    time: '1572291251.1216063'
+    version: 0
+  data1/file2.txt:
+    time: '1572291258.7336144'
+    version: 0
+  data2/file1.txt:
+    time: '1572291234.4415884'
+    version: 0
+  data2/file2.txt:
+    time: '1572291241.9095964'
+    version: 0
+  src/append1.py:
+    time: '1573181570.641285'
+    version: 0
+  src/append2.py:
+    time: '1573181711.7568874'
+    version: 0
+  src/reader.py:
+    time: '1573178354.1623242'
+    version: 0
+  src/writer.py:
+    time: '1573598885.4682686'
+    version: 0
+script_versions:
+  append1:
+    script_path: src/append1.py
+    version: 0
+  append2:
+    script_path: src/append2.py
+    version: 0
+  reader:
+    script_path: src/reader.py
+    version: 0
+  writer:
+    script_path: src/writer.py
+    version: 0

@@ -9,6 +9,7 @@ from log_manager import LogManager
 from constants import *
 from searcher import Searcher
 import acaisdk
+import random
 
 
 class Scheduler:
@@ -159,7 +160,7 @@ class Scheduler:
         # Go through hyper parameters and input node versions
         hp_list = self.grid_search_hp(node.hyper_parameter)
         input_nodes_versions = self.grid_search_nv(node.input_nodes)
-        jobs = []
+        #jobs = []
         submitted = False
         total = len(hp_list) * len(input_nodes_versions)
         if total == 0:
@@ -167,6 +168,9 @@ class Scheduler:
                           "Something is wrong with the hyper-parameter"
                           " setting or previous nodes.".format(node.node_name), 'red'))
         cur = 1
+        jobs = []
+        MAX_JOBS_PARALLEL = 24
+        finish_count = 0
         for hp in hp_list:
             for input_nodes in input_nodes_versions:
                 shouldRun, version = self.log_manager.experiment_run(node.node_name, node.script_version, hp, input_nodes)
@@ -186,11 +190,18 @@ class Scheduler:
                 run_job.start()
                 jobs.append(run_job)
                 cur += 1
-        # Waiting for all jobs to finish
-        finish_count = 0
+                if len(jobs) >= MAX_JOBS_PARALLEL:
+                    # wait for all jobs to finish before continuing
+                    for j in jobs:
+                        j.join()
+                        finish_count += 1
+                        print(colored("+++ Finished: "+str(finish_count), 'blue'))
+                    jobs = []
         for j in jobs:
             j.join()
             finish_count += 1
+            print(colored("+++ Finished: "+str(finish_count), 'blue'))
+        
             # print(colored("Finished {}/{} job for node {}".format(finish_count, total, node.node_name), 'blue'))
         print(colored("All jobs for node {} finished!".format(node.node_name), 'blue'))
         # After this node is finished, check its descendants
@@ -257,7 +268,8 @@ class Scheduler:
                 'output_file_set': name
             }
             job = acaisdk.job.Job()
-            status = job.with_attributes(attr).register().run().wait()
+            job_stat_wait_time = 0 #10+int(random.random()*60)
+            status = job.with_attributes(attr).register().run().wait(first_sleep=job_stat_wait_time, subsequent_sleeps=job_stat_wait_time)
             if status != acaisdk.job.JobStatus.FINISHED:
                 print(colored("A job for node {} failed!".format(name), "red"))
                 return
