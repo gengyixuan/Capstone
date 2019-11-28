@@ -2,3 +2,5 @@ glove.6B.300d.txt
 .idea/
 .DS_Store
 __pycache__/
+ACAI/mock_space
+ACAI/metadata
