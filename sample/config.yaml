@@ -1,5 +1,5 @@
 pipeline: # Pipeline section, defines pipeline's properties
-    project_name: text_classifier_2 # Name of the pipeline
+    project_name: analytics_toytest_37 # Name of the pipeline, cloud last run #29
     admin_token: EmDlCTBF1ppONSciYVd03M9xkmF6hFqW
     user_name: AnalyticsTeam
 
@@ -14,12 +14,12 @@ modules:
             -   name: mult
                 type: float # Type of the param, int, float or collection
                 start: 0.2
-                end: 0.6
+                end: 0.4
                 step_size: 0.2
             -   name: add
                 type: float # Type of the param, int, float or collection
                 start: 1.0
-                end: 2.0
+                end: 1.5
                 step_size: 0.5
 
     -   node: append1 # Name of the module
@@ -62,8 +62,3 @@ modules:
                     - SVM
                     - NaiveBayes
                     - MLP
-                    - DT
-                    - KNN
-                    - RandomForest
-                    - Adaboost
-                    - GradientBoost

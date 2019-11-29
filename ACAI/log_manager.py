@@ -1,4 +1,5 @@
 import copy
+import os
 import pickle
 from utils import Node
 from constants import *
@@ -6,6 +7,12 @@ from constants import *
 class LogManager:
     def __init__(self, reverse_log_path=REVERSE_LOG_PATH, fileset_hp_path=FILESET_HP_PATH, log_path=LOG_PATH):
         self.separator = "\t#\t"
+        
+        tmp_list = reverse_log_path.split('/')
+        meta_data_workspace = tmp_list[0] + '/' + tmp_list[1]
+
+        if not os.path.exists(meta_data_workspace):
+            os.mkdir(meta_data_workspace)
         
         # Key: <str> NodeName + "\t#\t" + FileSetVersion
         # val: [(InputNodeName, FileSetVersion)]
@@ -58,25 +65,28 @@ class LogManager:
         if tmp_key not in self.reverse_log:
             paths.append(copy.deepcopy(cur_path))
             return
-        
+
         inputs = self.reverse_log[tmp_key]
 
-        for one_tuple in inputs:
-            input_node = one_tuple[0]
-            input_fs_version = one_tuple[1]
+        if len(inputs) == 0:
+            paths.append(copy.deepcopy(cur_path))
+            return
+
+        for one_key in inputs:
+            input_node = one_key
+            input_fs_version = inputs[one_key]
 
             new_path = copy.deepcopy(cur_path)
             new_path[input_node] = input_fs_version
-            # new_path.add(input_node)
             self.dfs_visit(input_node, input_fs_version, new_path, paths)
 
 
     def tracking_ancestors(self, inputs):
         all_paths = []
         
-        for one_tuple in inputs:
-            input_node = one_tuple[0]
-            input_fs_version = one_tuple[1]
+        for one_key in inputs:
+            input_node = one_key
+            input_fs_version = inputs[one_key]
 
             cur_path = {input_node: input_fs_version}
             self.dfs_visit(input_node, input_fs_version, cur_path, all_paths)
@@ -136,6 +146,8 @@ class LogManager:
                     return False, out_fileset_V
 
         all_paths = self.tracking_ancestors(inputs)
+        # print(inputs)
+        # print(all_paths)
         return self.check_ancestors_hp(all_paths), None
 
 

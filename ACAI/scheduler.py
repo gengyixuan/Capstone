@@ -8,10 +8,10 @@ from termcolor import colored
 from log_manager import LogManager
 from constants import *
 from searcher import Searcher
+
 from acaisdk.file import File
 from acaisdk.fileset import FileSet
 from acaisdk.job import Job, JobStatus
-
 
 class Scheduler:
     # graph: list of Node
@@ -174,10 +174,13 @@ class Scheduler:
                           "Something is wrong with the hyper-parameter"
                           " setting or previous nodes.".format(node.node_name), 'red'))
         cur = 1
+        jobs = []
+        MAX_JOBS_PARALLEL = 24
+        finish_count = 0
         for hp in hp_list:
             for input_nodes in input_nodes_versions:
-                shouldRun, version = self.log_manager.experiment_run(node.node_name, node.script_version, hp, input_nodes)
-                if not shouldRun:
+                should_run, version = self.log_manager.experiment_run(node.node_name, node.script_version, hp, input_nodes)
+                if not should_run:
                     if version:
                         self.add_node_version(node, version)
                         print(colored("Skip the {}/{} job for node {}: Already run before".format(cur, total, node.node_name), 'blue'))
@@ -191,11 +194,18 @@ class Scheduler:
                 run_job.start()
                 jobs.append(run_job)
                 cur += 1
-        # Waiting for all jobs to finish
-        finish_count = 0
+                if len(jobs) >= MAX_JOBS_PARALLEL:
+                    # wait for all jobs to finish before continuing
+                    for j in jobs:
+                        j.join()
+                        finish_count += 1
+                        print(colored("+++ Finished: "+str(finish_count), 'blue'))
+                    jobs = []
         for j in jobs:
             j.join()
             finish_count += 1
+            print(colored("+++ Finished: "+str(finish_count), 'blue'))
+        
             # print(colored("Finished {}/{} job for node {}".format(finish_count, total, node.node_name), 'blue'))
         print(colored("All jobs for node {} finished!".format(node.node_name), 'blue'))
         # After this node is finished, check its descendants
@@ -272,7 +282,8 @@ class Scheduler:
                 'output_file_set': name
             }
             job = Job()
-            status = job.with_attributes(attr).register().run().wait()
+            job_stat_wait_time = 0 #10+int(random.random()*60)
+            status = job.with_attributes(attr).register().run().wait(first_sleep=job_stat_wait_time, subsequent_sleeps=job_stat_wait_time)
             if status != JobStatus.FINISHED:
                 print(colored("A job for node {} failed!".format(name), "red"))
                 return
