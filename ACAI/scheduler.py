@@ -1,6 +1,6 @@
 import time
 import os
-import sys
+import pickle as pkl
 from threading import Thread
 from zipfile import ZipFile
 from termcolor import colored
@@ -8,7 +8,9 @@ from termcolor import colored
 from log_manager import LogManager
 from constants import *
 from searcher import Searcher
-import acaisdk
+from acaisdk.file import File
+from acaisdk.fileset import FileSet
+from acaisdk.job import Job, JobStatus
 
 
 class Scheduler:
@@ -33,6 +35,9 @@ class Scheduler:
         script_name = script_path.split('/')[-1]
         local_generated_script_name = "{}_{}.py".format(self.workspace, node_name)
         cloud_generated_script_name = "_{}.py".format(node_name)
+
+        if os.path.exists(local_generated_script_name):
+            return
         fs = open(local_generated_script_name, "w")
 
         # Import necessary function & tool
@@ -72,7 +77,7 @@ class Scheduler:
         print(local_generated_script_name, cloud_generated_script_name, local_zip_filename, cloud_zip_filename)
         with ZipFile(local_zip_filename, "w") as zipf:
             zipf.write(local_generated_script_name, cloud_generated_script_name)
-        acaisdk.file.File.upload([(local_zip_filename, cloud_zip_filename)])
+        File.upload([(local_zip_filename, cloud_zip_filename)])
 
     def run_workflow(self):
         print("Workflow start")
@@ -81,11 +86,14 @@ class Scheduler:
         else:
             self.searcher = Searcher(self.graph, self.search_method)
             self.run_workflow_optim()
-        # Delete temporary scripts
+
         for node in self.graph:
+            # Delete temporary scripts
             temp_script = "{}_{}.py".format(self.workspace, node.node_name)
             if os.path.exists(temp_script):
                 os.remove(temp_script)
+            if node.isResult:
+                self.retrieve_result(node)
 
     def run_workflow_grid(self):
         # Execute nodes with zero in-degree
@@ -160,7 +168,6 @@ class Scheduler:
         hp_list = self.grid_search_hp(node.hyper_parameter)
         input_nodes_versions = self.grid_search_nv(node.input_nodes)
         jobs = []
-        submitted = False
         total = len(hp_list) * len(input_nodes_versions)
         if total == 0:
             print(colored("No jobs to explore for Node {}. "
@@ -179,9 +186,7 @@ class Scheduler:
                     cur += 1
                     continue
                 # print(colored("Starting the {}/{} job for node {}".format(cur, total, node.node_name), 'blue'))
-                if not submitted:
-                    self.build_scripts(node)
-                    submitted = True
+                self.build_scripts(node)
                 run_job = Thread(target=self.submit_job, args=(node, hp, input_nodes))
                 run_job.start()
                 jobs.append(run_job)
@@ -205,9 +210,19 @@ class Scheduler:
     # q: Queue of Nodes
     # hps: hyper parameter setting
     def submit_node_optim(self, node, q, hps):
+        # Get the latest version from input nodes
         input_nodes_ver = {}
         for pre in node.input_nodes:
             input_nodes_ver[pre.node_name] = pre.last_ver
+        # Check if it's been run before
+        should_run, version = self.log_manager.experiment_run(
+            node.node_name, node.script_version, hps[node.node_name], input_nodes_ver)
+        # No need to run
+        if not should_run:
+            self.add_node_version(node, version)
+            return
+        # Build scripts and run
+        self.build_scripts(node)
         self.submit_job(node, hps[node.node_name], input_nodes_ver)
         # After this node is finished, check its descendants
         # for executable nodes (nodes with 0 in-degree)
@@ -242,7 +257,7 @@ class Scheduler:
             for dependency in node.dependencies:
                 fileset_list.append(dependency)
             fileset_list.append(node.script_path)
-            input_file_set = acaisdk.fileset.FileSet.create_file_set("{}_input".format(name), fileset_list)
+            input_file_set = FileSet.create_file_set("{}_input".format(name), fileset_list)
             attr = {
                 "v_cpu": "0.5",
                 "memory": "320Mi",
@@ -256,9 +271,9 @@ class Scheduler:
                 'name': name,
                 'output_file_set': name
             }
-            job = acaisdk.job.Job()
+            job = Job()
             status = job.with_attributes(attr).register().run().wait()
-            if status != acaisdk.job.JobStatus.FINISHED:
+            if status != JobStatus.FINISHED:
                 print(colored("A job for node {} failed!".format(name), "red"))
                 return
             output_fileset = job.output_file_set
@@ -312,5 +327,23 @@ class Scheduler:
             combo_list = new_combo_list
         return combo_list
 
-    # Reach goal
-    # def bayesian_search(self):
+    # Retrieve results from all the jobs for target node
+    # node: target node (must be a result node)
+    def retrieve_result(self, node):
+        # Make tmp dir for downloaded result
+        tmp_dir = "result_tmp"
+        if not os.path.exists(tmp_dir):
+            os.mkdir(tmp_dir)
+        # Download results
+        node_name = node.node_name
+        results = {}
+        for ver in self.node_versions[node_name]:
+            remote_path = "{}_output/{}.pkl:{}".format(node_name, node_name, ver)
+            local_path = "{}/{}.pkl".format(tmp_dir, node_name)
+            File.download({remote_path: local_path})
+            rst = pkl.load(open(local_path, "rb"))
+            for metric in rst:
+                if not isinstance(rst[metric], (int, float)):
+                    rst.pop(metric, None)
+            results[ver] = rst
+        self.log_manager.save_result(node_name, results)
