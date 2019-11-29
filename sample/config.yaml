@@ -1,5 +1,5 @@
 pipeline: # Pipeline section, defines pipeline's properties
-    project_name: analytics_toytest_37 # Name of the pipeline, cloud last run #29
+    project_name: analytics_bayesian_1 # Name of the pipeline, cloud last run #29
     admin_token: EmDlCTBF1ppONSciYVd03M9xkmF6hFqW
     user_name: AnalyticsTeam
 
@@ -15,12 +15,10 @@ modules:
                 type: float # Type of the param, int, float or collection
                 start: 0.2
                 end: 0.4
-                step_size: 0.2
             -   name: add
                 type: float # Type of the param, int, float or collection
                 start: 1.0
                 end: 1.5
-                step_size: 0.5
 
     -   node: append1 # Name of the module
         script: src/append1.py
@@ -28,10 +26,9 @@ modules:
             -   reader
         params:
             -   name: num
-                type: collection # Type of the param, int, float or collection
-                values: # Possible vaules for collection param
-                    - 1000
-                    - 2000
+                type: float
+                start: -1.0
+                end: 1.0
 
     -   node: append2 # Name of the module
         script: src/append2.py
@@ -39,10 +36,9 @@ modules:
             -   reader
         params:
             -   name: num
-                type: collection # Type of the param, int, float or collection
-                values: # Possible vaules for collection param
-                    - -1000
-                    - -2000
+                type: float
+                start: -1.0
+                end: 1.0
 
     -   node: writer
         script: src/writer.py
@@ -53,12 +49,8 @@ modules:
             -   name: subtract
                 type: float
                 start: -1.0
-                end: 0.0
-                step_size: 2.0
-
-            -   name: classifier
-                type: collection # Type of the param, int, float or collection
-                values: # Possible vaules for collection param
-                    - SVM
-                    - NaiveBayes
-                    - MLP
+                end: 1.0
+        optimize:
+            -   metric: sum_of_stuff
+            -   direction: max # min | max
+            -   search: bayesian # grid | bayesian (if bayesian, must be all float)

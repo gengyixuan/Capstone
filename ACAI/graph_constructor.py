@@ -152,6 +152,14 @@ class GraphConstructor(object):
             script_versions = history['script_versions']
             # {node_name: {"version":version, "script_path":script_path}
 
+        # init optimizer info in case this is an optimization job
+        optimization_info = {
+            "result_node": None, # pointer to result node in computation graph
+            "search": "grid", # "grid" or "bayesian"
+            "metric": "", # name of the optimization metric
+            "direction": "max", # "max" or "min", direction for metric optimization
+        }
+
         # create compute nodes
         compute_nodes = {}
         uploaded = set()
@@ -193,6 +201,14 @@ class GraphConstructor(object):
                           hyperparams=hyperparams)
             compute_nodes[node_name] = newnode
 
+            # check if this node is the one to optimize
+            if 'optimize' in module:
+                opt = module['optimize']
+                optimization_info['result_node'] = newnode
+                optimization_info["search"] = opt['search']
+                optimization_info["metric"] = opt['metric']
+                optimization_info["direction"] = opt['direction']
+
         # save new history dict to disk
         history['script_versions'] = script_versions
         history['file_versions'] = file_versions
@@ -210,7 +226,9 @@ class GraphConstructor(object):
                 node.input_nodes.append(in_node)
                 in_node.output_nodes.append(node)
             graph.append(node)
-        return graph
+
+        print(optimization_info)
+        return graph, optimization_info
 
 
         
