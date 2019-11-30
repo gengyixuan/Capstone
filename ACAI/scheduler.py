@@ -87,6 +87,9 @@ class Scheduler:
         else:
             self.searcher = Searcher(self.graph, self.optim_info['search'])
             self.run_workflow_optim()
+        # Persist local mock logs
+        if self.mock:
+            self.mock.persist_to_disk()
         # Delete temporary scripts
         for node in self.graph:
             temp_script = "{}_{}.py".format(self.workspace, node.node_name)
@@ -375,7 +378,7 @@ class Scheduler:
                 File.download({remote_path: local_path})
             rst = pkl.load(open(local_path, "rb"))
             for metric in rst:
-                if not isinstance(rst[metric], (int, float)):
+                if not isinstance(rst[metric], (int, float, list, dict)):
                     rst.pop(metric, None)
             results[ver] = rst
         self.log_manager.save_result(node_name, results)
