@@ -222,7 +222,6 @@ class LogManager:
         hp_dict = {}
         
         ver_list = []
-
         for ver in results:
             ver_list.append(int(ver))
             hp_dict[ver] = self.track_hp(node_name, ver)
@@ -243,11 +242,12 @@ class LogManager:
         if not os.path.exists(OUTPUT_PATH):
             os.mkdir(OUTPUT_PATH)
 
-        evaluation_result_path = OUTPUT_PATH + "/evaluation_full.csv"
+        evaluation_full_result_path = OUTPUT_PATH + "/eval_full.csv"
         header_row = ['job'] + list(metric_set) + list(node_set)
         # print(header_row)
 
-        with open(evaluation_result_path, 'w') as outfile:
+        # generate full evaluation
+        with open(evaluation_full_result_path, 'w') as outfile:
             writer = csv.writer(outfile)
             writer.writerow(header_row)
 
@@ -265,13 +265,50 @@ class LogManager:
 
                 writer.writerow(line_out)
 
+        # generate metric specific ranking
+        metric_cand = []
 
+        for tmpmetric in metric_set:
+            valid_metric = True
+            for ver in metric_dict:
+                test_metric = metric_dict[ver][tmpmetric]
 
+                if isinstance(test_metric, int):
+                    continue
+                elif isinstance(test_metric, float):
+                    continue
+                elif isinstance(test_metric, bool):
+                    continue
+                else:
+                    valid_metric = False
+                    break
 
+            if valid_metric:
+                metric_cand.append(tmpmetric)
 
+        # print(metric_cand)
+        for one_metric in metric_cand:
+            # ranking
+            one_metric_dict = {}
+            for ver in metric_dict:
+                one_metric_dict[ver] = metric_dict[ver][one_metric]
 
+            ranked_res = sorted(one_metric_dict.items(), key=lambda item:item[1], reverse=True)
 
+            evaluation_one_result_path = OUTPUT_PATH + "/eval_" + str(one_metric) + ".csv"
+            header_row = ['job'] + [one_metric] + list(node_set)
 
+            with open(evaluation_one_result_path, 'w') as outfile:
+                writer = csv.writer(outfile)
+                writer.writerow(header_row)
+
+                for ver, one_res in ranked_res:
+                    # print(str(ver) + ', ' + str(one_res))
+                    line_out = [str(int(ver) + 1), one_res]
+                    for i in range(2, len(header_row)):
+                        tmphp = header_row[i]
+                        line_out.append(hp_dict[ver][tmphp])
+                    writer.writerow(line_out)
 
 
 # for testing
