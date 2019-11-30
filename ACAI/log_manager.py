@@ -1,5 +1,6 @@
 import copy
 import os
+import csv
 import pickle
 from utils import Node
 from constants import *
@@ -210,11 +211,63 @@ class LogManager:
 
             path_hp_dict[one_node] = self.fileset_hp[tmp_key]
         # print(path_hp_dict)
+        return path_hp_dict
             
 
     def save_result(self, node_name, results):
+        # key: version (last node), val: metric (dict)
+        metric_dict = {}
+
+        # key: version (last node), val: hp on path (dict)
+        hp_dict = {}
+        
+        ver_list = []
+
         for ver in results:
-            self.track_hp(node_name, ver)
+            ver_list.append(int(ver))
+            hp_dict[ver] = self.track_hp(node_name, ver)
+            metric_dict[ver] = results[ver]
+
+        node_set = set()
+        for tmpkey in hp_dict:
+            for tmpnode in hp_dict[tmpkey]:
+                node_set.add(tmpnode)
+
+        metric_set = set()
+        for tmpkey in metric_dict:
+            for tmpmetric in metric_dict[tmpkey]:
+                metric_set.add(tmpmetric)
+
+        # print(metric_dict)
+        # print(hp_dict)
+        if not os.path.exists(OUTPUT_PATH):
+            os.mkdir(OUTPUT_PATH)
+
+        evaluation_result_path = OUTPUT_PATH + "/evaluation_full.csv"
+        header_row = ['job'] + list(metric_set) + list(node_set)
+        # print(header_row)
+
+        with open(evaluation_result_path, 'w') as outfile:
+            writer = csv.writer(outfile)
+            writer.writerow(header_row)
+
+            for ver_int in sorted(ver_list):
+                ver = str(ver_int)
+                line_out = [str(ver_int + 1)]
+
+                for i in range(1, 1 + len(metric_set)):
+                    tmpmetric = header_row[i]
+                    line_out.append(metric_dict[ver][tmpmetric])
+
+                for i in range(1 + len(metric_set), len(header_row)):
+                    tmphp = header_row[i]
+                    line_out.append(hp_dict[ver][tmphp])
+
+                writer.writerow(line_out)
+
+
+
+
 
 
 
