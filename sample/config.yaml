@@ -15,10 +15,12 @@ modules:
                 type: float # Type of the param, int, float or collection
                 start: 0.2
                 end: 0.4
+                step_size: 0.1
             -   name: add
                 type: float # Type of the param, int, float or collection
                 start: 1.0
                 end: 1.5
+                step_size: 0.2
 
     -   node: append1 # Name of the module
         script: src/append1.py
@@ -29,6 +31,7 @@ modules:
                 type: float
                 start: -1.0
                 end: 1.0
+                step_size: 1
 
     -   node: append2 # Name of the module
         script: src/append2.py
@@ -39,6 +42,7 @@ modules:
                 type: float
                 start: -1.0
                 end: 1.0
+                step_size: 1
 
     -   node: writer
         script: src/writer.py
@@ -50,7 +54,8 @@ modules:
                 type: float
                 start: -1.0
                 end: 1.0
+                step_size: 1
         optimize:
-            -   metric: sum_of_stuff
-            -   direction: max # min | max
-            -   search: bayesian # grid | bayesian (if bayesian, must be all float)
+                metric: sum_of_stuff
+                direction: max # min | max
+                search: bayesian # grid | bayesian (if bayesian, must be all float)

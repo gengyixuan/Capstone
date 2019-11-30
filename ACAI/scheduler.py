@@ -13,6 +13,7 @@ from acaisdk.file import File
 from acaisdk.fileset import FileSet
 from acaisdk.job import Job, JobStatus
 
+
 class Scheduler:
     # graph: list of Node
     def __init__(self, graph, workspace, optim_info, mock=None):
@@ -86,14 +87,13 @@ class Scheduler:
         else:
             self.searcher = Searcher(self.graph, self.optim_info['search'])
             self.run_workflow_optim()
-
+        # Delete temporary scripts
         for node in self.graph:
-            # Delete temporary scripts
             temp_script = "{}_{}.py".format(self.workspace, node.node_name)
             if os.path.exists(temp_script):
                 os.remove(temp_script)
-            if node.isResult:
-                self.retrieve_result(node)
+        # Retrieve results
+        self.retrieve_result(self.optim_info['result_node'])
 
     def run_workflow_grid(self):
         # Execute nodes with zero in-degree
@@ -162,22 +162,19 @@ class Scheduler:
                 File.download({"{}_output/{}.pkl".format(result_node_name, result_node_name)
                                : result_path})
             # Get target metric value
-            result = pkl.load(open(result_path, "wb"))
+            result = pkl.load(open(result_path, "rb"))
             last_rst = result[self.optim_info['metric']]
             assert isinstance(last_rst, (int, float))
+            if self.optim_info['direction'] == 'min':
+                last_rst = -last_rst
             if os.path.exists(result_path):
                 os.remove(result_path)
             # Update best result
-            if not best_rst or self.compare(last_rst, best_rst):
+            if not best_rst or last_rst > best_rst:
                 best_rst = last_rst
                 no_improve_count = 0
             else:
                 no_improve_count += 1
-
-    def compare(self, current, best):
-        if self.optim_info['direction'] == 'max':
-            return current > best
-        return current < best
 
     # Submit all jobs for target node to ACAI System
     # node: target Node

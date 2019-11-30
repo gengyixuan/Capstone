@@ -1,5 +1,5 @@
 import numpy as np
-from numpy import argmax
+from numpy import argmax, argmin
 from scipy.stats import norm
 from sklearn.gaussian_process import GaussianProcessRegressor
 from warnings import catch_warnings
@@ -10,6 +10,7 @@ class Searcher:
     def __init__(self, graph, search_method='bayesian'):
         # Only support Bayesian optimization for now
         assert search_method == 'bayesian'
+        self.search_method = search_method
         self.graph = graph
         self.log = None
         self.samples = None
@@ -21,8 +22,6 @@ class Searcher:
         for node in self.graph:
             for hp in node.hyper_parameter:
                 assert hp['type'] == 'float'
-                if hp['type'] != 'float':
-                    continue
                 new_samples = []
                 for cur_combo in samples:
                     count = int((hp['end'] - hp['start']) / hp['step_size'] + 1)
