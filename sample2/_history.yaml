@@ -5,14 +5,23 @@ file_versions:
   _append1.py:
     time: '1574738645.2651298'
     version: 1
+  _append1.zip:
+    time: '1574746918.6657002'
+    version: 0
   _history.yaml:
-    time: '1574746852.159173'
-    version: 29
+    time: '1574746863.4918385'
+    version: 30
   _reader.py:
     time: '1574738644.4437993'
     version: 2
+  _reader.zip:
+    time: '1574746863.4938202'
+    version: 0
   _writer.py:
     time: '1574738647.043392'
+    version: 0
+  _writer.zip:
+    time: '1574746973.5710878'
     version: 0
   config.yaml:
     time: '1573617159.6906524'

@@ -15,14 +15,14 @@ from acaisdk.job import Job, JobStatus
 
 class Scheduler:
     # graph: list of Node
-    def __init__(self, graph, workspace, search_method='grid', mock=None):
+    def __init__(self, graph, workspace, optim_info, mock=None):
         self.node_versions = dict()
         self.graph = graph
         self.log_manager = LogManager()
         self.workspace = workspace
         self.mock = mock
         self.local = not not mock
-        self.search_method = search_method
+        self.optim_info = optim_info
         self.searcher = None
         for node in graph:
             self.node_versions[node.node_name] = []
@@ -81,10 +81,10 @@ class Scheduler:
 
     def run_workflow(self):
         print("Workflow start")
-        if self.search_method == 'grid':
+        if self.optim_info['search'] == 'grid':
             self.run_workflow_grid()
         else:
-            self.searcher = Searcher(self.graph, self.search_method)
+            self.searcher = Searcher(self.graph, self.optim_info['search'])
             self.run_workflow_optim()
 
         for node in self.graph:
@@ -151,13 +151,33 @@ class Scheduler:
                 run_node.start()
                 exec_count += 1
             run_node.join()
-            # TODO: get results
-            last_rst = self.get_result()
+            # Download latest result
+            result_node = self.optim_info['result_node']
+            result_node_name = result_node.node_name
+            if self.local:
+                result_path = "{}/{}:{}/{}_output/{}.pkl".format(
+                    MOCK_PATH, result_node_name, result_node.last_ver, result_node_name, result_node_name)
+            else:
+                result_path = "tmp_{}.pkl".format(result_node_name)
+                File.download({"{}_output/{}.pkl".format(result_node_name, result_node_name)
+                               : result_path})
+            # Get target metric value
+            result = pkl.load(open(result_path, "wb"))
+            last_rst = result[self.optim_info['metric']]
+            assert isinstance(last_rst, (int, float))
+            if os.path.exists(result_path):
+                os.remove(result_path)
+            # Update best result
             if not best_rst or self.compare(last_rst, best_rst):
                 best_rst = last_rst
                 no_improve_count = 0
             else:
                 no_improve_count += 1
+
+    def compare(self, current, best):
+        if self.optim_info['direction'] == 'max':
+            return current > best
+        return current < best
 
     # Submit all jobs for target node to ACAI System
     # node: target Node
@@ -349,12 +369,18 @@ class Scheduler:
         node_name = node.node_name
         results = {}
         for ver in self.node_versions[node_name]:
-            remote_path = "{}_output/{}.pkl:{}".format(node_name, node_name, ver)
-            local_path = "{}/{}.pkl".format(tmp_dir, node_name)
-            File.download({remote_path: local_path})
+            if self.local:
+                local_path = "{}/{}:{}/{}_output/{}.pkl".format(
+                    MOCK_PATH, node_name, ver, node_name, node_name)
+            else:
+                remote_path = "{}_output/{}.pkl:{}".format(node_name, node_name, ver)
+                local_path = "{}/{}.pkl".format(tmp_dir, node_name)
+                File.download({remote_path: local_path})
             rst = pkl.load(open(local_path, "rb"))
             for metric in rst:
                 if not isinstance(rst[metric], (int, float)):
                     rst.pop(metric, None)
             results[ver] = rst
         self.log_manager.save_result(node_name, results)
+        if os.path.exists(tmp_dir):
+            os.remove(tmp_dir)

@@ -7,9 +7,9 @@ from warnings import simplefilter
 
 
 class Searcher:
-    def __init__(self, graph, search_method='Bayesian'):
+    def __init__(self, graph, search_method='bayesian'):
         # Only support Bayesian optimization for now
-        assert search_method == 'Bayesian'
+        assert search_method == 'bayesian'
         self.graph = graph
         self.log = None
         self.samples = None
@@ -46,6 +46,7 @@ class Searcher:
             last_sample = self.dict2list(last_hps)
             self.log[0].append(last_sample)
             self.log[1].append([last_rst])
+            self.model.fit(self.log[0], self.log[1])
             # calculate the best surrogate score found so far
             yhat, _ = self.surrogate(self.log[0])
             best = max(yhat)
