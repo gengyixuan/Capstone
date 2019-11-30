@@ -265,11 +265,18 @@ class LogManager:
 
                 for i in range(1, 1 + len(metric_set)):
                     tmpmetric = header_row[i]
-                    line_out.append(metric_dict[ver][tmpmetric])
+
+                    if tmpmetric in metric_dict[ver]:
+                        line_out.append(metric_dict[ver][tmpmetric])
+                    else:
+                        line_out.append("NULL")
 
                 for i in range(1 + len(metric_set), len(header_row)):
                     tmphp = header_row[i]
-                    line_out.append(hp_dict[ver][tmphp])
+                    if tmphp in hp_dict[ver]:
+                        line_out.append(hp_dict[ver][tmphp])
+                    else:
+                        line_out.append("NULL")
 
                 writer.writerow(line_out)
 
@@ -320,7 +327,10 @@ class LogManager:
                     line_out = [str(int(ver) + 1), one_res]
                     for i in range(2, len(header_row)):
                         tmphp = header_row[i]
-                        line_out.append(hp_dict[ver][tmphp])
+                        if tmphp in hp_dict[ver]:
+                            line_out.append(hp_dict[ver][tmphp])
+                        else:
+                            line_out.append("NULL")
                     writer.writerow(line_out)
 
 
