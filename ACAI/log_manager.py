@@ -243,13 +243,21 @@ class LogManager:
             os.mkdir(OUTPUT_PATH)
 
         evaluation_full_result_path = OUTPUT_PATH + "/eval_full.csv"
-        header_row = ['job'] + list(metric_set) + list(node_set)
+        header_row = ['JOB'] + list(metric_set) + list(node_set)
         # print(header_row)
 
         # generate full evaluation
         with open(evaluation_full_result_path, 'w') as outfile:
             writer = csv.writer(outfile)
-            writer.writerow(header_row)
+            
+            header_row_output = [header_row[0]]
+            for i in range(1, 1 + len(metric_set)):
+                header_row_output.append("METRIC_" + header_row[i])
+
+            for i in range(1 + len(metric_set), len(header_row)):
+                header_row_output.append("PARAM_" + header_row[i])
+
+            writer.writerow(header_row_output)
 
             for ver_int in sorted(ver_list):
                 ver = str(ver_int)
@@ -300,7 +308,12 @@ class LogManager:
 
             with open(evaluation_one_result_path, 'w') as outfile:
                 writer = csv.writer(outfile)
-                writer.writerow(header_row)
+
+                header_row_output = [header_row[0], "METRIC_" + header_row[1]]
+                for i in range(2, len(header_row)):
+                    header_row_output.append("PARAM_" + header_row[i])
+
+                writer.writerow(header_row_output)
 
                 for ver, one_res in ranked_res:
                     # print(str(ver) + ', ' + str(one_res))
