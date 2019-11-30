@@ -80,6 +80,25 @@ class LogManager:
             new_path[input_node] = input_fs_version
             self.dfs_visit(input_node, input_fs_version, new_path, paths)
 
+    
+    def dfs_visit_back(self, node_name, fileset_version, cur_path):
+        tmp_key = node_name + self.separator + str(fileset_version)
+        
+        if tmp_key not in self.reverse_log:
+            return
+
+        inputs = self.reverse_log[tmp_key]
+
+        if len(inputs) == 0:
+            return
+
+        for one_key in inputs:
+            input_node = one_key
+            input_fs_version = inputs[one_key]
+
+            cur_path[input_node] = input_fs_version
+            self.dfs_visit_back(input_node, input_fs_version, cur_path)
+
 
     def tracking_ancestors(self, inputs):
         all_paths = []
@@ -170,6 +189,36 @@ class LogManager:
 
         with open(self.log_path, 'wb') as outfile:
             pickle.dump(self.log, outfile, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+    def track_hp(self, node_name, fs_version):
+        # key: node_name, val: hp_dict
+        path_hp_dict = {}
+        
+        # key: node_name, val: fs_version
+        path_fs_dict = {}
+
+        path_fs_dict = {node_name: fs_version}
+        self.dfs_visit_back(node_name, fs_version, path_fs_dict)
+
+        for one_node in path_fs_dict:
+            tmp_key = one_node + self.separator + str(path_fs_dict[one_node])
+
+            if tmp_key not in self.fileset_hp:
+                print('error in track_hp func (fs not found)')
+                continue
+
+            path_hp_dict[one_node] = self.fileset_hp[tmp_key]
+        # print(path_hp_dict)
+            
+
+    def save_result(self, node_name, results):
+        for ver in results:
+            self.track_hp(node_name, ver)
+
+
+
+
 
 
 # for testing
