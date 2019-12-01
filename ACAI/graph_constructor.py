@@ -206,9 +206,9 @@ class GraphConstructor(object):
             if 'optimize' in module:
                 opt = module['optimize']
                 optimization_info['result_node'] = newnode
-                optimization_info["search"] = opt['search']
+                optimization_info["search"] = opt['search'].lower()
                 optimization_info["metric"] = opt['metric']
-                optimization_info["direction"] = opt['direction']
+                optimization_info["direction"] = opt['direction'].lower()
 
         # save new history dict to disk
         history['script_versions'] = script_versions

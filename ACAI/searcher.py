@@ -1,5 +1,5 @@
 import numpy as np
-from numpy import argmax
+from numpy import argmax, argmin
 from scipy.stats import norm
 from sklearn.gaussian_process import GaussianProcessRegressor
 from warnings import catch_warnings
@@ -7,9 +7,10 @@ from warnings import simplefilter
 
 
 class Searcher:
-    def __init__(self, graph, search_method='Bayesian'):
+    def __init__(self, graph, search_method='bayesian'):
         # Only support Bayesian optimization for now
-        assert search_method == 'Bayesian'
+        assert search_method == 'bayesian'
+        self.search_method = search_method
         self.graph = graph
         self.log = None
         self.samples = None
@@ -21,8 +22,6 @@ class Searcher:
         for node in self.graph:
             for hp in node.hyper_parameter:
                 assert hp['type'] == 'float'
-                if hp['type'] != 'float':
-                    continue
                 new_samples = []
                 for cur_combo in samples:
                     count = int((hp['end'] - hp['start']) / hp['step_size'] + 1)
@@ -46,6 +45,7 @@ class Searcher:
             last_sample = self.dict2list(last_hps)
             self.log[0].append(last_sample)
             self.log[1].append([last_rst])
+            self.model.fit(self.log[0], self.log[1])
             # calculate the best surrogate score found so far
             yhat, _ = self.surrogate(self.log[0])
             best = max(yhat)

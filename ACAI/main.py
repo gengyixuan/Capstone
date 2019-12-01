@@ -23,14 +23,14 @@ if __name__ == '__main__':
 
     # Begin workflow
     gc = GraphConstructor(workspace, args.local)
-    graph, opt_info = gc.load_graph()
+    graph, optim_info = gc.load_graph()
+    # Use local mock or not
     mock = None
     if args.local:
         mock = Mock(workspace, MOCK_PATH)
-    sc = Scheduler(graph, workspace, 'grid', mock)
+    sc = Scheduler(graph, workspace, optim_info, mock)
+    # Run workflow
     sc.run_workflow()
-    end = time.time()
-
     # Get running time
     end = time.time()
     print(colored("Total time: {}s".format(end - start), "green"))

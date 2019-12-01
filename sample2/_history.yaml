@@ -3,20 +3,29 @@ credentials:
   ACAI_TOKEN: sTk9P5poZYtB1yaI77T3r14ITgVDM4m6
 file_versions:
   _append1.py:
-    time: '1574738645.2651298'
-    version: 1
+    time: '1575017300.6217334'
+    version: 2
+  _append1.zip:
+    time: '1574746918.6657002'
+    version: 0
   _history.yaml:
-    time: '1574746852.159173'
-    version: 29
+    time: '1575087859.3839784'
+    version: 39
   _reader.py:
     time: '1574738644.4437993'
     version: 2
+  _reader.zip:
+    time: '1574746863.4938202'
+    version: 0
   _writer.py:
-    time: '1574738647.043392'
+    time: '1575087504.080603'
+    version: 2
+  _writer.zip:
+    time: '1574746973.5710878'
     version: 0
   config.yaml:
-    time: '1573617159.6906524'
-    version: 0
+    time: '1575087476.8421006'
+    version: 1
   data1/file1.txt:
     time: '1572292235.0'
     version: 0
@@ -36,8 +45,8 @@ file_versions:
     time: '1573178268.0'
     version: 0
   src/writer.py:
-    time: '1573617253.9861'
-    version: 1
+    time: '1575087476.8455305'
+    version: 2
   src/writer2.py:
     time: '1573616971.0'
     version: 0
@@ -50,4 +59,4 @@ script_versions:
     version: 0
   writer:
     script_path: src/writer.py
-    version: 2
+    version: 3

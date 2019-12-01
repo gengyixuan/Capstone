@@ -1,5 +1,6 @@
 import copy
 import os
+import csv
 import pickle
 from utils import Node
 from constants import *
@@ -79,6 +80,25 @@ class LogManager:
             new_path = copy.deepcopy(cur_path)
             new_path[input_node] = input_fs_version
             self.dfs_visit(input_node, input_fs_version, new_path, paths)
+
+    
+    def dfs_visit_back(self, node_name, fileset_version, cur_path):
+        tmp_key = node_name + self.separator + str(fileset_version)
+        
+        if tmp_key not in self.reverse_log:
+            return
+
+        inputs = self.reverse_log[tmp_key]
+
+        if len(inputs) == 0:
+            return
+
+        for one_key in inputs:
+            input_node = one_key
+            input_fs_version = inputs[one_key]
+
+            cur_path[input_node] = input_fs_version
+            self.dfs_visit_back(input_node, input_fs_version, cur_path)
 
 
     def tracking_ancestors(self, inputs):
@@ -170,6 +190,148 @@ class LogManager:
 
         with open(self.log_path, 'wb') as outfile:
             pickle.dump(self.log, outfile, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+    def track_hp(self, node_name, fs_version):
+        # key: node_name, val: hp_dict
+        path_hp_dict = {}
+        
+        # key: node_name, val: fs_version
+        path_fs_dict = {}
+
+        path_fs_dict = {node_name: fs_version}
+        self.dfs_visit_back(node_name, fs_version, path_fs_dict)
+
+        for one_node in path_fs_dict:
+            tmp_key = one_node + self.separator + str(path_fs_dict[one_node])
+
+            if tmp_key not in self.fileset_hp:
+                print('error in track_hp func (fs not found)')
+                continue
+
+            path_hp_dict[one_node] = self.fileset_hp[tmp_key]
+        # print(path_hp_dict)
+        return path_hp_dict
+            
+
+    def save_result(self, node_name, results):
+        # key: version (last node), val: metric (dict)
+        metric_dict = {}
+
+        # key: version (last node), val: hp on path (dict)
+        hp_dict = {}
+        
+        ver_list = []
+        for ver in results:
+            ver_list.append(int(ver))
+            hp_dict[ver] = self.track_hp(node_name, ver)
+            metric_dict[ver] = results[ver]
+
+        node_set = set()
+        for tmpkey in hp_dict:
+            for tmpnode in hp_dict[tmpkey]:
+                node_set.add(tmpnode)
+
+        metric_set = set()
+        for tmpkey in metric_dict:
+            for tmpmetric in metric_dict[tmpkey]:
+                metric_set.add(tmpmetric)
+
+        # print(metric_dict)
+        # print(hp_dict)
+        if not os.path.exists(OUTPUT_PATH):
+            os.mkdir(OUTPUT_PATH)
+
+        evaluation_full_result_path = OUTPUT_PATH + "/eval_full.csv"
+        header_row = ['JOB'] + list(metric_set) + list(node_set)
+        # print(header_row)
+
+        # generate full evaluation
+        with open(evaluation_full_result_path, 'w') as outfile:
+            writer = csv.writer(outfile)
+            
+            header_row_output = [header_row[0]]
+            for i in range(1, 1 + len(metric_set)):
+                header_row_output.append("METRIC_" + header_row[i])
+
+            for i in range(1 + len(metric_set), len(header_row)):
+                header_row_output.append("PARAM_" + header_row[i])
+
+            writer.writerow(header_row_output)
+
+            for ver_int in sorted(ver_list):
+                ver = str(ver_int)
+                line_out = [str(ver_int + 1)]
+
+                for i in range(1, 1 + len(metric_set)):
+                    tmpmetric = header_row[i]
+
+                    if tmpmetric in metric_dict[ver]:
+                        line_out.append(metric_dict[ver][tmpmetric])
+                    else:
+                        line_out.append("NULL")
+
+                for i in range(1 + len(metric_set), len(header_row)):
+                    tmphp = header_row[i]
+                    if tmphp in hp_dict[ver]:
+                        line_out.append(hp_dict[ver][tmphp])
+                    else:
+                        line_out.append("NULL")
+
+                writer.writerow(line_out)
+
+        # generate metric specific ranking
+        metric_cand = []
+
+        for tmpmetric in metric_set:
+            valid_metric = True
+            for ver in metric_dict:
+                test_metric = metric_dict[ver][tmpmetric]
+
+                if isinstance(test_metric, int):
+                    continue
+                elif isinstance(test_metric, float):
+                    continue
+                elif isinstance(test_metric, bool):
+                    continue
+                else:
+                    valid_metric = False
+                    break
+
+            if valid_metric:
+                metric_cand.append(tmpmetric)
+
+        # print(metric_cand)
+        for one_metric in metric_cand:
+            # ranking
+            one_metric_dict = {}
+            for ver in metric_dict:
+                one_metric_dict[ver] = metric_dict[ver][one_metric]
+
+            ranked_res = sorted(one_metric_dict.items(), key=lambda item:item[1], reverse=True)
+
+            evaluation_one_result_path = OUTPUT_PATH + "/eval_" + str(one_metric) + ".csv"
+            header_row = ['job'] + [one_metric] + list(node_set)
+
+            with open(evaluation_one_result_path, 'w') as outfile:
+                writer = csv.writer(outfile)
+
+                header_row_output = [header_row[0], "METRIC_" + header_row[1]]
+                for i in range(2, len(header_row)):
+                    header_row_output.append("PARAM_" + header_row[i])
+
+                writer.writerow(header_row_output)
+
+                for ver, one_res in ranked_res:
+                    # print(str(ver) + ', ' + str(one_res))
+                    line_out = [str(int(ver) + 1), one_res]
+                    for i in range(2, len(header_row)):
+                        tmphp = header_row[i]
+                        if tmphp in hp_dict[ver]:
+                            line_out.append(hp_dict[ver][tmphp])
+                        else:
+                            line_out.append("NULL")
+                    writer.writerow(line_out)
 
 
 # for testing
