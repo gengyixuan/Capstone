@@ -127,14 +127,13 @@ class Scheduler:
         no_improve_count = 0
         max_no_improve_count = 10
         count = 1
+        # Run workflow
         while no_improve_count < max_no_improve_count:
             print(colored("Starting round {} of hyper parameter search...".format(count), 'blue'))
             hps = self.searcher.get_next_hps(hps, last_rst)
             # Reset in-degree for each node
             for node in self.graph:
                 node.input_nodes_num = len(node.input_nodes)
-                for pre in node.input_nodes:
-                    pre.output_nodes.append(node)
             # Execute nodes with zero indegree
             q = []
             for node in self.graph:
@@ -144,8 +143,6 @@ class Scheduler:
             exec_count = 0
             # Keep looping until all nodes are executed
             while exec_count < len(self.graph):
-                if not q:
-                    print(colored("No runnable nodes now. Waiting...", 'green'))
                 # Constantly check if new nodes are added to the queue
                 while not q:
                     time.sleep(SLEEP_INTERVAL)
@@ -170,20 +167,23 @@ class Scheduler:
             assert isinstance(last_rst, (int, float))
             if self.optim_info['direction'] == 'min':
                 last_rst = -last_rst
-            if os.path.exists(result_path):
+            if not self.local and os.path.exists(result_path):
                 os.remove(result_path)
             # Update best result
             if not best_rst or last_rst > best_rst:
                 best_rst = last_rst
                 no_improve_count = 0
+                print(colored("New best result! {}:{}".format(self.optim_info['metric'], best_rst), 'blue'))
             else:
                 no_improve_count += 1
+                print(colored("No improvement in {} continuous searches".format(no_improve_count), 'blue'))
+            count += 1
 
     # Submit all jobs for target node to ACAI System
     # node: target Node
     # q: Queue of Nodes
     def submit_node(self, node, q):
-        print(colored("Node {} is ready to run. Starting...".format(node.node_name), 'blue'))
+        print(colored("Start Node {} ...".format(node.node_name), 'blue'))
         # Go through hyper parameters and input node versions
         hp_list = self.grid_search_hp(node.hyper_parameter)
         input_nodes_versions = self.grid_search_nv(node.input_nodes)
@@ -240,6 +240,7 @@ class Scheduler:
     # q: Queue of Nodes
     # hps: hyper parameter setting
     def submit_node_optim(self, node, q, hps):
+        print(colored("Start Node {} ...".format(node.node_name), 'blue'))
         # Get the latest version from input nodes
         input_nodes_ver = {}
         for pre in node.input_nodes:
@@ -250,10 +251,10 @@ class Scheduler:
         # No need to run
         if not should_run:
             self.add_node_version(node, version)
-            return
-        # Build scripts and run
-        self.build_scripts(node)
-        self.submit_job(node, hps[node.node_name], input_nodes_ver)
+        else:
+            # Build scripts and run
+            self.build_scripts(node)
+            self.submit_job(node, hps[node.node_name], input_nodes_ver)
         # After this node is finished, check its descendants
         # for executable nodes (nodes with 0 in-degree)
         for out in node.output_nodes:
@@ -383,4 +384,5 @@ class Scheduler:
             results[ver] = rst
         self.log_manager.save_result(node_name, results)
         if os.path.exists(tmp_dir):
-            os.remove(tmp_dir)
+            import shutil
+            shutil.rmtree(tmp_dir)
