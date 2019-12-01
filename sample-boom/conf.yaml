@@ -1,0 +1,61 @@
+pipeline: # Pipeline section, defines pipeline's properties
+    mode: local # Running mode, local or docker, default local
+    name: text_classifier # Name of the pipeline
+    rabbitmq_host: 127.0.0.1 # RabbitMQ's host uri
+    clean_up: false # Whether the pipeline cleans up after finished running, true or false
+    use_mongodb: false # Whether to use MongoDB, true or false, default false
+    mongodb_host: 127.0.0.1 # MongoDB's host
+
+modules:
+    -   name: reader # Name of the module
+        type: Reader # Type of the module
+        input_file: data.json
+        output_module: append  # The following module's name
+        instances: 1 # Number of instances of this module
+        processes: 1
+        params:
+            -   name: mult
+                type: float # Type of the param, int, float or collection
+                start: 0.2
+                end: 0.6
+                step_size: 0.2
+            -   name: add
+                type: float # Type of the param, int, float or collection
+                start: 1.0
+                end: 2.0
+                step_size: 0.5
+
+    -   name: append # Name of the module
+        type: Append # Type of the module
+        output_module: writer  # The following module's name
+        instances: 1 # Number of instances of this module
+        params:
+            -   name: num
+                type: collection # Type of the param, int, float or collection
+                values: # Possible vaules for collection param
+                    - 1000
+                    - 2000
+
+    -   name: writer
+        script: src/writer.py
+        type: Writer
+        output_file: ./results-classifier.csv
+        instances: 1
+        params:
+            -   name: subtract
+                type: float
+                start: -1.0
+                end: 0.0
+                step_size: 2.0
+
+            -   name: classifier
+                type: collection # Type of the param, int, float or collection
+                values: # Possible vaules for collection param
+                    - SVM
+                    - NaiveBayes
+                    - MLP
+                    - DT
+                    - KNN
+                    - RandomForest
+                    - Adaboost
+                    - GradientBoost

@@ -1,0 +1,581 @@
+I1112 22:55:08.076236 36951 pipeline.py:38] Loading configuration file
+I1112 22:55:08.077537 36951 pipeline.py:39] {
+    "pipeline": {
+        "name": "text_classifier", 
+        "rabbitmq_host": "127.0.0.1", 
+        "use_mongodb": false, 
+        "clean_up": false, 
+        "mode": "local", 
+        "mongodb_host": "127.0.0.1"
+    }, 
+    "modules": [
+        {
+            "processes": 1, 
+            "name": "reader", 
+            "input_file": "data.json", 
+            "instances": 1, 
+            "params": [
+                {
+                    "start": 0.2, 
+                    "step_size": 0.2, 
+                    "end": 0.6, 
+                    "type": "float", 
+                    "name": "mult"
+                }, 
+                {
+                    "start": 1.0, 
+                    "step_size": 0.5, 
+                    "end": 2.0, 
+                    "type": "float", 
+                    "name": "add"
+                }
+            ], 
+            "output_module": "append", 
+            "type": "Reader"
+        }, 
+        {
+            "instances": 1, 
+            "output_module": "writer", 
+            "type": "Append", 
+            "name": "append", 
+            "params": [
+                {
+                    "values": [
+                        1000, 
+                        2000
+                    ], 
+                    "type": "collection", 
+                    "name": "num"
+                }
+            ]
+        }, 
+        {
+            "name": "writer", 
+            "script": "src/writer.py", 
+            "output_file": "./results-classifier.csv", 
+            "instances": 1, 
+            "params": [
+                {
+                    "start": -1.0, 
+                    "step_size": 2.0, 
+                    "end": 0.0, 
+                    "type": "float", 
+                    "name": "subtract"
+                }, 
+                {
+                    "values": [
+                        "SVM", 
+                        "NaiveBayes", 
+                        "MLP", 
+                        "DT", 
+                        "KNN", 
+                        "RandomForest", 
+                        "Adaboost", 
+                        "GradientBoost"
+                    ], 
+                    "type": "collection", 
+                    "name": "classifier"
+                }
+            ], 
+            "type": "Writer"
+        }
+    ]
+}
+I1112 22:55:08.078839 36951 pipeline.py:59] Module list: {u'writer': {u'name': u'writer', u'script': u'src/writer.py', u'output_file': u'./results-classifier.csv', u'instances': 1, u'params': [{u'start': -1.0, u'step_size': 2.0, u'end': 0.0, u'type': u'float', u'name': u'subtract'}, {u'values': [u'SVM', u'NaiveBayes', u'MLP', u'DT', u'KNN', u'RandomForest', u'Adaboost', u'GradientBoost'], u'type': u'collection', u'name': u'classifier'}], u'type': u'Writer'}, u'append': {u'instances': 1, u'output_module': u'writer', u'type': u'Append', u'name': u'append', u'params': [{u'values': [1000, 2000], u'type': u'collection', u'name': u'num'}]}, u'reader': {u'processes': 1, u'name': u'reader', u'input_file': u'data.json', u'instances': 1, u'params': [{u'start': 0.2, u'step_size': 0.2, u'end': 0.6, u'type': u'float', u'name': u'mult'}, {u'start': 1.0, u'step_size': 0.5, u'end': 2.0, u'type': u'float', u'name': u'add'}], u'output_module': u'append', u'type': u'Reader'}}
+I1112 22:55:08.079272 36951 pipeline.py:63] Total jobs: 243
+I1112 22:55:08.091229 36950 module.py:224] Module logger started, awaiting for requests.
+I1112 22:55:08.101027 36948 module.py:224] Module append started, awaiting for requests.
+I1112 22:55:08.101027 36948 module.py:224] Module append started, awaiting for requests.
+I1112 22:55:08.102432 36949 module.py:224] Module writer started, awaiting for requests.
+I1112 22:55:08.102432 36949 module.py:224] Module writer started, awaiting for requests.
+I1112 22:55:08.103652 36947 module.py:224] Module reader started, awaiting for requests.
+I1112 22:55:08.103652 36947 module.py:224] Module reader started, awaiting for requests.
+I1112 22:55:08.112262 36951 pipeline.py:277] Sent job 0 to module reader
+I1112 22:55:08.113385 36951 pipeline.py:277] Sent job 1 to module reader
+I1112 22:55:08.114181 36951 pipeline.py:277] Sent job 2 to module reader
+I1112 22:55:08.114559 36947 module.py:108] reader received job: 0
+I1112 22:55:08.115192 36947 module.py:165] Load data from file 2019-11-12_22h55m02s/data.json
+I1112 22:55:08.114559 36947 module.py:108] reader received job: 0
+I1112 22:55:08.115192 36947 module.py:165] Load data from file 2019-11-12_22h55m02s/data.json
+I1112 22:55:08.115861 36951 pipeline.py:277] Sent job 3 to module reader
+I1112 22:55:08.116641 36951 pipeline.py:277] Sent job 4 to module reader
+I1112 22:55:08.116980 36947 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_
+I1112 22:55:08.116980 36947 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_
+I1112 22:55:08.117408 36951 pipeline.py:277] Sent job 5 to module reader
+I1112 22:55:08.118016 36951 pipeline.py:277] Sent job 6 to module reader
+I1112 22:55:08.118597 36951 pipeline.py:277] Sent job 7 to module reader
+I1112 22:55:08.119430 36951 pipeline.py:277] Sent job 8 to module reader
+I1112 22:55:08.129040 36947 module.py:137] reader sent back job: 0
+I1112 22:55:08.129040 36947 module.py:137] reader sent back job: 0
+I1112 22:55:08.130662 36951 pipeline.py:277] Sent job 9 to module append
+I1112 22:55:08.131510 36951 pipeline.py:277] Sent job 10 to module append
+I1112 22:55:08.132606 36947 module.py:108] reader received job: 1
+I1112 22:55:08.132606 36947 module.py:108] reader received job: 1
+I1112 22:55:08.133517 36947 module.py:165] Load data from file 2019-11-12_22h55m02s/data.json
+I1112 22:55:08.133517 36947 module.py:165] Load data from file 2019-11-12_22h55m02s/data.json
+I1112 22:55:08.134440 36948 module.py:108] append received job: 9
+I1112 22:55:08.135636 36947 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.4}_
+I1112 22:55:08.135955 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_
+I1112 22:55:08.135636 36947 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.4}_
+I1112 22:55:08.137105 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_
+I1112 22:55:08.134440 36948 module.py:108] append received job: 9
+I1112 22:55:08.135955 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_
+I1112 22:55:08.137105 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_
+I1112 22:55:08.151259 36948 module.py:137] append sent back job: 9
+I1112 22:55:08.151259 36948 module.py:137] append sent back job: 9
+I1112 22:55:08.151271 36947 module.py:137] reader sent back job: 1
+I1112 22:55:08.151271 36947 module.py:137] reader sent back job: 1
+I1112 22:55:08.153028 36951 pipeline.py:277] Sent job 11 to module append
+I1112 22:55:08.153973 36951 pipeline.py:277] Sent job 12 to module append
+I1112 22:55:08.155082 36951 pipeline.py:277] Sent job 13 to module writer
+I1112 22:55:08.155081 36948 module.py:108] append received job: 10
+I1112 22:55:08.155081 36948 module.py:108] append received job: 10
+I1112 22:55:08.155904 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_
+I1112 22:55:08.155904 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_
+I1112 22:55:08.155798 36951 pipeline.py:277] Sent job 14 to module writer
+I1112 22:55:08.156713 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_
+I1112 22:55:08.156713 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_
+I1112 22:55:08.156971 36951 pipeline.py:277] Sent job 15 to module writer
+I1112 22:55:08.154114 36947 module.py:108] reader received job: 2
+I1112 22:55:08.154114 36947 module.py:108] reader received job: 2
+I1112 22:55:08.158406 36951 pipeline.py:277] Sent job 16 to module writer
+I1112 22:55:08.159142 36951 pipeline.py:277] Sent job 17 to module writer
+I1112 22:55:08.159651 36951 pipeline.py:277] Sent job 18 to module writer
+I1112 22:55:08.159631 36949 module.py:108] writer received job: 13
+I1112 22:55:08.159631 36949 module.py:108] writer received job: 13
+I1112 22:55:08.160418 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_
+I1112 22:55:08.162415 36947 module.py:165] Load data from file 2019-11-12_22h55m02s/data.json
+I1112 22:55:08.163234 36947 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.6000000000000001}_
+I1112 22:55:08.160418 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_
+I1112 22:55:08.161030 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_writer_{"subtract": -1.0, "classifier": "SVM"}_
+I1112 22:55:08.162415 36947 module.py:165] Load data from file 2019-11-12_22h55m02s/data.json
+I1112 22:55:08.163234 36947 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.6000000000000001}_
+I1112 22:55:08.161030 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_writer_{"subtract": -1.0, "classifier": "SVM"}_
+I1112 22:55:08.161166 36951 pipeline.py:277] Sent job 19 to module writer
+I1112 22:55:08.161693 36951 pipeline.py:277] Sent job 20 to module writer
+I1112 22:55:08.182176 36949 module.py:137] writer sent back job: 13
+I1112 22:55:08.182176 36949 module.py:137] writer sent back job: 13
+I1112 22:55:08.183374 36948 module.py:137] append sent back job: 10
+I1112 22:55:08.183679 36947 module.py:137] reader sent back job: 2
+I1112 22:55:08.183374 36948 module.py:137] append sent back job: 10
+I1112 22:55:08.183679 36947 module.py:137] reader sent back job: 2
+I1112 22:55:08.184304 36951 pipeline.py:225] Job 13 completed.
+I1112 22:55:08.185322 36948 module.py:108] append received job: 11
+I1112 22:55:08.185314 36951 pipeline.py:277] Sent job 21 to module writer
+I1112 22:55:08.186705 36951 pipeline.py:277] Sent job 22 to module writer
+I1112 22:55:08.186398 36949 module.py:108] writer received job: 14
+I1112 22:55:08.186398 36949 module.py:108] writer received job: 14
+I1112 22:55:08.185322 36948 module.py:108] append received job: 11
+I1112 22:55:08.187371 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_
+I1112 22:55:08.187500 36951 pipeline.py:277] Sent job 23 to module writer
+I1112 22:55:08.187371 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_
+I1112 22:55:08.188216 36951 pipeline.py:277] Sent job 24 to module writer
+I1112 22:55:08.188263 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_writer_{"subtract": -1.0, "classifier": "NaiveBayes"}_
+I1112 22:55:08.188263 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_writer_{"subtract": -1.0, "classifier": "NaiveBayes"}_
+I1112 22:55:08.188572 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.4}_
+I1112 22:55:08.188572 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.4}_
+I1112 22:55:08.189935 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.4}_append_{"num": 1000}_
+I1112 22:55:08.189315 36951 pipeline.py:277] Sent job 25 to module writer
+I1112 22:55:08.189935 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.4}_append_{"num": 1000}_
+I1112 22:55:08.192044 36951 pipeline.py:277] Sent job 26 to module writer
+I1112 22:55:08.192610 36951 pipeline.py:277] Sent job 27 to module writer
+I1112 22:55:08.193537 36951 pipeline.py:277] Sent job 28 to module writer
+I1112 22:55:08.194808 36951 pipeline.py:277] Sent job 29 to module append
+I1112 22:55:08.195687 36951 pipeline.py:277] Sent job 30 to module append
+I1112 22:55:08.196621 36947 module.py:108] reader received job: 3
+I1112 22:55:08.197520 36947 module.py:165] Load data from file 2019-11-12_22h55m02s/data.json
+I1112 22:55:08.196621 36947 module.py:108] reader received job: 3
+I1112 22:55:08.197520 36947 module.py:165] Load data from file 2019-11-12_22h55m02s/data.json
+I1112 22:55:08.198508 36947 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.2}_
+I1112 22:55:08.198508 36947 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.2}_
+I1112 22:55:08.210509 36948 module.py:137] append sent back job: 11
+I1112 22:55:08.210509 36948 module.py:137] append sent back job: 11
+I1112 22:55:08.211560 36951 pipeline.py:277] Sent job 31 to module writer
+I1112 22:55:08.213639 36951 pipeline.py:277] Sent job 32 to module writer
+I1112 22:55:08.214195 36951 pipeline.py:277] Sent job 33 to module writer
+I1112 22:55:08.214704 36951 pipeline.py:277] Sent job 34 to module writer
+I1112 22:55:08.215218 36951 pipeline.py:277] Sent job 35 to module writer
+I1112 22:55:08.215817 36951 pipeline.py:277] Sent job 36 to module writer
+I1112 22:55:08.216404 36951 pipeline.py:277] Sent job 37 to module writer
+I1112 22:55:08.217206 36951 pipeline.py:277] Sent job 38 to module writer
+I1112 22:55:08.215603 36948 module.py:108] append received job: 12
+I1112 22:55:08.216342 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.4}_
+I1112 22:55:08.216972 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.4}_append_{"num": 2000}_
+I1112 22:55:08.215603 36948 module.py:108] append received job: 12
+I1112 22:55:08.216342 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.4}_
+I1112 22:55:08.216972 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.4}_append_{"num": 2000}_
+I1112 22:55:08.228176 36949 module.py:137] writer sent back job: 14
+I1112 22:55:08.228176 36949 module.py:137] writer sent back job: 14
+I1112 22:55:08.240392 36949 module.py:108] writer received job: 15
+I1112 22:55:08.241923 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_
+I1112 22:55:08.240392 36949 module.py:108] writer received job: 15
+I1112 22:55:08.241923 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_
+I1112 22:55:08.242849 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_writer_{"subtract": -1.0, "classifier": "MLP"}_
+I1112 22:55:08.239515 36951 pipeline.py:225] Job 14 completed.
+I1112 22:55:08.242849 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_writer_{"subtract": -1.0, "classifier": "MLP"}_
+I1112 22:55:08.259373 36949 module.py:137] writer sent back job: 15
+I1112 22:55:08.259373 36949 module.py:137] writer sent back job: 15
+I1112 22:55:08.260657 36948 module.py:137] append sent back job: 12
+I1112 22:55:08.262200 36949 module.py:108] writer received job: 16
+I1112 22:55:08.260657 36948 module.py:137] append sent back job: 12
+I1112 22:55:08.262200 36949 module.py:108] writer received job: 16
+I1112 22:55:08.262840 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_
+I1112 22:55:08.262840 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_
+I1112 22:55:08.263569 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_writer_{"subtract": -1.0, "classifier": "DT"}_
+I1112 22:55:08.263569 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_writer_{"subtract": -1.0, "classifier": "DT"}_
+I1112 22:55:08.266133 36948 module.py:108] append received job: 29
+I1112 22:55:08.266133 36948 module.py:108] append received job: 29
+I1112 22:55:08.272490 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.6000000000000001}_
+I1112 22:55:08.272490 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.6000000000000001}_
+I1112 22:55:08.274323 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.6000000000000001}_append_{"num": 1000}_
+I1112 22:55:08.274323 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.6000000000000001}_append_{"num": 1000}_
+I1112 22:55:08.275629 36951 pipeline.py:277] Sent job 39 to module writer
+I1112 22:55:08.279373 36951 pipeline.py:277] Sent job 40 to module writer
+I1112 22:55:08.280642 36951 pipeline.py:277] Sent job 41 to module writer
+I1112 22:55:08.283215 36951 pipeline.py:277] Sent job 42 to module writer
+I1112 22:55:08.284193 36951 pipeline.py:277] Sent job 43 to module writer
+I1112 22:55:08.285718 36951 pipeline.py:277] Sent job 44 to module writer
+I1112 22:55:08.286377 36951 pipeline.py:277] Sent job 45 to module writer
+I1112 22:55:08.286844 36951 pipeline.py:277] Sent job 46 to module writer
+I1112 22:55:08.287295 36951 pipeline.py:225] Job 15 completed.
+I1112 22:55:08.296514 36947 module.py:137] reader sent back job: 3
+I1112 22:55:08.296514 36947 module.py:137] reader sent back job: 3
+I1112 22:55:08.298614 36951 pipeline.py:277] Sent job 47 to module append
+I1112 22:55:08.299158 36951 pipeline.py:277] Sent job 48 to module append
+I1112 22:55:08.299138 36947 module.py:108] reader received job: 4
+I1112 22:55:08.299138 36947 module.py:108] reader received job: 4
+I1112 22:55:08.300076 36947 module.py:165] Load data from file 2019-11-12_22h55m02s/data.json
+I1112 22:55:08.300076 36947 module.py:165] Load data from file 2019-11-12_22h55m02s/data.json
+I1112 22:55:08.301352 36947 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.4}_
+I1112 22:55:08.301352 36947 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.4}_
+I1112 22:55:08.326090 36949 module.py:137] writer sent back job: 16
+I1112 22:55:08.326090 36949 module.py:137] writer sent back job: 16
+I1112 22:55:08.330830 36949 module.py:108] writer received job: 17
+I1112 22:55:08.330830 36949 module.py:108] writer received job: 17
+I1112 22:55:08.331641 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_
+I1112 22:55:08.331641 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_
+I1112 22:55:08.332429 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_writer_{"subtract": -1.0, "classifier": "KNN"}_
+I1112 22:55:08.332429 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_writer_{"subtract": -1.0, "classifier": "KNN"}_
+I1112 22:55:08.329515 36951 pipeline.py:225] Job 16 completed.
+I1112 22:55:08.335074 36948 module.py:137] append sent back job: 29
+I1112 22:55:08.337914 36947 module.py:137] reader sent back job: 4
+I1112 22:55:08.337527 36951 pipeline.py:277] Sent job 49 to module writer
+I1112 22:55:08.339361 36951 pipeline.py:277] Sent job 50 to module writer
+I1112 22:55:08.337914 36947 module.py:137] reader sent back job: 4
+I1112 22:55:08.340275 36951 pipeline.py:277] Sent job 51 to module writer
+I1112 22:55:08.341998 36951 pipeline.py:277] Sent job 52 to module writer
+I1112 22:55:08.342649 36947 module.py:108] reader received job: 5
+I1112 22:55:08.342649 36947 module.py:108] reader received job: 5
+I1112 22:55:08.343302 36947 module.py:165] Load data from file 2019-11-12_22h55m02s/data.json
+I1112 22:55:08.343638 36951 pipeline.py:277] Sent job 53 to module writer
+I1112 22:55:08.344429 36951 pipeline.py:277] Sent job 54 to module writer
+I1112 22:55:08.343302 36947 module.py:165] Load data from file 2019-11-12_22h55m02s/data.json
+I1112 22:55:08.345109 36951 pipeline.py:277] Sent job 55 to module writer
+I1112 22:55:08.345227 36947 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.6000000000000001}_
+I1112 22:55:08.345227 36947 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.6000000000000001}_
+I1112 22:55:08.346766 36951 pipeline.py:277] Sent job 56 to module writer
+I1112 22:55:08.347743 36951 pipeline.py:277] Sent job 57 to module append
+I1112 22:55:08.348551 36951 pipeline.py:277] Sent job 58 to module append
+I1112 22:55:08.335074 36948 module.py:137] append sent back job: 29
+I1112 22:55:08.350709 36948 module.py:108] append received job: 30
+I1112 22:55:08.351331 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.6000000000000001}_
+I1112 22:55:08.350709 36948 module.py:108] append received job: 30
+I1112 22:55:08.351331 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.6000000000000001}_
+I1112 22:55:08.352122 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.6000000000000001}_append_{"num": 2000}_
+I1112 22:55:08.352122 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.6000000000000001}_append_{"num": 2000}_
+I1112 22:55:08.365164 36949 module.py:137] writer sent back job: 17
+I1112 22:55:08.367629 36951 pipeline.py:225] Job 17 completed.
+I1112 22:55:08.365164 36949 module.py:137] writer sent back job: 17
+I1112 22:55:08.376024 36949 module.py:108] writer received job: 18
+I1112 22:55:08.376765 36947 module.py:137] reader sent back job: 5
+I1112 22:55:08.376765 36947 module.py:137] reader sent back job: 5
+I1112 22:55:08.378055 36951 pipeline.py:277] Sent job 59 to module append
+I1112 22:55:08.378839 36951 pipeline.py:277] Sent job 60 to module append
+I1112 22:55:08.376024 36949 module.py:108] writer received job: 18
+I1112 22:55:08.379324 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_
+I1112 22:55:08.380120 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_writer_{"subtract": -1.0, "classifier": "RandomForest"}_
+I1112 22:55:08.379324 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_
+I1112 22:55:08.380120 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_writer_{"subtract": -1.0, "classifier": "RandomForest"}_
+I1112 22:55:08.382349 36947 module.py:108] reader received job: 6
+I1112 22:55:08.382349 36947 module.py:108] reader received job: 6
+I1112 22:55:08.382962 36947 module.py:165] Load data from file 2019-11-12_22h55m02s/data.json
+I1112 22:55:08.382962 36947 module.py:165] Load data from file 2019-11-12_22h55m02s/data.json
+I1112 22:55:08.383774 36947 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 2.0, "mult": 0.2}_
+I1112 22:55:08.383774 36947 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 2.0, "mult": 0.2}_
+I1112 22:55:08.397177 36951 pipeline.py:277] Sent job 61 to module writer
+I1112 22:55:08.397972 36951 pipeline.py:277] Sent job 62 to module writer
+I1112 22:55:08.399321 36951 pipeline.py:277] Sent job 63 to module writer
+I1112 22:55:08.400031 36951 pipeline.py:277] Sent job 64 to module writer
+I1112 22:55:08.395616 36948 module.py:137] append sent back job: 30
+I1112 22:55:08.400684 36951 pipeline.py:277] Sent job 65 to module writer
+I1112 22:55:08.395616 36948 module.py:137] append sent back job: 30
+I1112 22:55:08.401349 36951 pipeline.py:277] Sent job 66 to module writer
+I1112 22:55:08.401984 36951 pipeline.py:277] Sent job 67 to module writer
+I1112 22:55:08.403132 36951 pipeline.py:277] Sent job 68 to module writer
+I1112 22:55:08.403846 36951 pipeline.py:225] Job 18 completed.
+I1112 22:55:08.405040 36947 module.py:137] reader sent back job: 6
+I1112 22:55:08.405040 36947 module.py:137] reader sent back job: 6
+I1112 22:55:08.403516 36949 module.py:137] writer sent back job: 18
+I1112 22:55:08.403516 36949 module.py:137] writer sent back job: 18
+I1112 22:55:08.408054 36948 module.py:108] append received job: 47
+I1112 22:55:08.408054 36948 module.py:108] append received job: 47
+I1112 22:55:08.408654 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.2}_
+I1112 22:55:08.409111 36951 pipeline.py:277] Sent job 69 to module append
+I1112 22:55:08.408654 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.2}_
+I1112 22:55:08.410203 36951 pipeline.py:277] Sent job 70 to module append
+I1112 22:55:08.410507 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.2}_append_{"num": 1000}_
+I1112 22:55:08.410507 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.2}_append_{"num": 1000}_
+I1112 22:55:08.411497 36947 module.py:108] reader received job: 7
+I1112 22:55:08.411497 36947 module.py:108] reader received job: 7
+I1112 22:55:08.412152 36947 module.py:165] Load data from file 2019-11-12_22h55m02s/data.json
+I1112 22:55:08.412097 36949 module.py:108] writer received job: 19
+I1112 22:55:08.412097 36949 module.py:108] writer received job: 19
+I1112 22:55:08.412688 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_
+I1112 22:55:08.412688 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_
+I1112 22:55:08.412152 36947 module.py:165] Load data from file 2019-11-12_22h55m02s/data.json
+I1112 22:55:08.416780 36947 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 2.0, "mult": 0.4}_
+I1112 22:55:08.415723 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_writer_{"subtract": -1.0, "classifier": "Adaboost"}_
+I1112 22:55:08.415723 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_writer_{"subtract": -1.0, "classifier": "Adaboost"}_
+I1112 22:55:08.416780 36947 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 2.0, "mult": 0.4}_
+I1112 22:55:08.448739 36948 module.py:137] append sent back job: 47
+I1112 22:55:08.448739 36948 module.py:137] append sent back job: 47
+I1112 22:55:08.451436 36951 pipeline.py:277] Sent job 71 to module writer
+I1112 22:55:08.452501 36948 module.py:108] append received job: 48
+I1112 22:55:08.452501 36948 module.py:108] append received job: 48
+I1112 22:55:08.454169 36951 pipeline.py:277] Sent job 72 to module writer
+I1112 22:55:08.455868 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.2}_
+I1112 22:55:08.455868 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.2}_
+I1112 22:55:08.456993 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.2}_append_{"num": 2000}_
+I1112 22:55:08.456775 36951 pipeline.py:277] Sent job 73 to module writer
+I1112 22:55:08.456993 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.2}_append_{"num": 2000}_
+I1112 22:55:08.457819 36951 pipeline.py:277] Sent job 74 to module writer
+I1112 22:55:08.459588 36949 module.py:137] writer sent back job: 19
+I1112 22:55:08.459799 36951 pipeline.py:277] Sent job 75 to module writer
+I1112 22:55:08.462198 36951 pipeline.py:277] Sent job 76 to module writer
+I1112 22:55:08.459588 36949 module.py:137] writer sent back job: 19
+I1112 22:55:08.463063 36951 pipeline.py:277] Sent job 77 to module writer
+I1112 22:55:08.463567 36951 pipeline.py:277] Sent job 78 to module writer
+I1112 22:55:08.464034 36951 pipeline.py:225] Job 19 completed.
+I1112 22:55:08.466680 36949 module.py:108] writer received job: 20
+I1112 22:55:08.466680 36949 module.py:108] writer received job: 20
+I1112 22:55:08.467308 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_
+I1112 22:55:08.467308 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_
+I1112 22:55:08.467958 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_writer_{"subtract": -1.0, "classifier": "GradientBoost"}_
+I1112 22:55:08.467958 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 1000}_writer_{"subtract": -1.0, "classifier": "GradientBoost"}_
+I1112 22:55:08.470288 36947 module.py:137] reader sent back job: 7
+I1112 22:55:08.470288 36947 module.py:137] reader sent back job: 7
+I1112 22:55:08.474267 36951 pipeline.py:277] Sent job 79 to module append
+I1112 22:55:08.474916 36951 pipeline.py:277] Sent job 80 to module append
+I1112 22:55:08.475501 36947 module.py:108] reader received job: 8
+I1112 22:55:08.475501 36947 module.py:108] reader received job: 8
+I1112 22:55:08.476063 36947 module.py:165] Load data from file 2019-11-12_22h55m02s/data.json
+I1112 22:55:08.476063 36947 module.py:165] Load data from file 2019-11-12_22h55m02s/data.json
+I1112 22:55:08.477050 36947 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 2.0, "mult": 0.6000000000000001}_
+I1112 22:55:08.477050 36947 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 2.0, "mult": 0.6000000000000001}_
+I1112 22:55:08.482104 36948 module.py:137] append sent back job: 48
+I1112 22:55:08.482104 36948 module.py:137] append sent back job: 48
+I1112 22:55:08.483087 36951 pipeline.py:277] Sent job 81 to module writer
+I1112 22:55:08.483683 36951 pipeline.py:277] Sent job 82 to module writer
+I1112 22:55:08.484203 36951 pipeline.py:277] Sent job 83 to module writer
+I1112 22:55:08.484709 36951 pipeline.py:277] Sent job 84 to module writer
+I1112 22:55:08.484576 36948 module.py:108] append received job: 57
+I1112 22:55:08.484576 36948 module.py:108] append received job: 57
+I1112 22:55:08.485073 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.4}_
+I1112 22:55:08.485073 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.4}_
+I1112 22:55:08.486121 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.4}_append_{"num": 1000}_
+I1112 22:55:08.486121 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.4}_append_{"num": 1000}_
+I1112 22:55:08.485265 36951 pipeline.py:277] Sent job 85 to module writer
+I1112 22:55:08.488148 36951 pipeline.py:277] Sent job 86 to module writer
+I1112 22:55:08.488908 36951 pipeline.py:277] Sent job 87 to module writer
+I1112 22:55:08.489588 36951 pipeline.py:277] Sent job 88 to module writer
+I1112 22:55:08.490080 36949 module.py:137] writer sent back job: 20
+I1112 22:55:08.492048 36949 module.py:108] writer received job: 21
+I1112 22:55:08.490080 36949 module.py:137] writer sent back job: 20
+I1112 22:55:08.492048 36949 module.py:108] writer received job: 21
+I1112 22:55:08.493030 36951 pipeline.py:225] Job 20 completed.
+I1112 22:55:08.493016 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_
+I1112 22:55:08.493016 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_
+I1112 22:55:08.494143 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_writer_{"subtract": -1.0, "classifier": "SVM"}_
+I1112 22:55:08.494143 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_writer_{"subtract": -1.0, "classifier": "SVM"}_
+I1112 22:55:08.501233 36947 module.py:137] reader sent back job: 8
+I1112 22:55:08.501233 36947 module.py:137] reader sent back job: 8
+I1112 22:55:08.506284 36951 pipeline.py:277] Sent job 89 to module append
+I1112 22:55:08.510339 36951 pipeline.py:277] Sent job 90 to module append
+I1112 22:55:08.514218 36948 module.py:137] append sent back job: 57
+I1112 22:55:08.514218 36948 module.py:137] append sent back job: 57
+I1112 22:55:08.515815 36948 module.py:108] append received job: 58
+I1112 22:55:08.515815 36948 module.py:108] append received job: 58
+I1112 22:55:08.516781 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.4}_
+I1112 22:55:08.516781 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.4}_
+I1112 22:55:08.517416 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.4}_append_{"num": 2000}_
+I1112 22:55:08.517416 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.4}_append_{"num": 2000}_
+I1112 22:55:08.516196 36951 pipeline.py:277] Sent job 91 to module writer
+I1112 22:55:08.516822 36951 pipeline.py:277] Sent job 92 to module writer
+I1112 22:55:08.517343 36951 pipeline.py:277] Sent job 93 to module writer
+I1112 22:55:08.517867 36951 pipeline.py:277] Sent job 94 to module writer
+I1112 22:55:08.518424 36951 pipeline.py:277] Sent job 95 to module writer
+I1112 22:55:08.519668 36951 pipeline.py:277] Sent job 96 to module writer
+I1112 22:55:08.520596 36951 pipeline.py:277] Sent job 97 to module writer
+I1112 22:55:08.521393 36951 pipeline.py:277] Sent job 98 to module writer
+I1112 22:55:08.524625 36949 module.py:137] writer sent back job: 21
+I1112 22:55:08.524625 36949 module.py:137] writer sent back job: 21
+I1112 22:55:08.525914 36951 pipeline.py:225] Job 21 completed.
+I1112 22:55:08.528978 36949 module.py:108] writer received job: 22
+I1112 22:55:08.529567 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_
+I1112 22:55:08.530400 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_writer_{"subtract": -1.0, "classifier": "NaiveBayes"}_
+I1112 22:55:08.528978 36949 module.py:108] writer received job: 22
+I1112 22:55:08.529567 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_
+I1112 22:55:08.530400 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_writer_{"subtract": -1.0, "classifier": "NaiveBayes"}_
+I1112 22:55:08.546094 36948 module.py:137] append sent back job: 58
+I1112 22:55:08.546094 36948 module.py:137] append sent back job: 58
+I1112 22:55:08.548882 36951 pipeline.py:277] Sent job 99 to module writer
+I1112 22:55:08.549454 36951 pipeline.py:277] Sent job 100 to module writer
+I1112 22:55:08.550179 36951 pipeline.py:277] Sent job 101 to module writer
+I1112 22:55:08.550832 36951 pipeline.py:277] Sent job 102 to module writer
+I1112 22:55:08.551333 36951 pipeline.py:277] Sent job 103 to module writer
+I1112 22:55:08.552613 36951 pipeline.py:277] Sent job 104 to module writer
+I1112 22:55:08.553730 36951 pipeline.py:277] Sent job 105 to module writer
+I1112 22:55:08.554800 36951 pipeline.py:277] Sent job 106 to module writer
+I1112 22:55:08.549829 36948 module.py:108] append received job: 59
+I1112 22:55:08.551127 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.6000000000000001}_
+I1112 22:55:08.554511 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.6000000000000001}_append_{"num": 1000}_
+I1112 22:55:08.549829 36948 module.py:108] append received job: 59
+I1112 22:55:08.551127 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.6000000000000001}_
+I1112 22:55:08.554511 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.6000000000000001}_append_{"num": 1000}_
+I1112 22:55:08.559612 36949 module.py:137] writer sent back job: 22
+I1112 22:55:08.559612 36949 module.py:137] writer sent back job: 22
+I1112 22:55:08.560926 36951 pipeline.py:225] Job 22 completed.
+I1112 22:55:08.561695 36949 module.py:108] writer received job: 23
+I1112 22:55:08.561695 36949 module.py:108] writer received job: 23
+I1112 22:55:08.562208 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_
+I1112 22:55:08.562208 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_
+I1112 22:55:08.562927 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_writer_{"subtract": -1.0, "classifier": "MLP"}_
+I1112 22:55:08.562927 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_writer_{"subtract": -1.0, "classifier": "MLP"}_
+I1112 22:55:08.572635 36948 module.py:137] append sent back job: 59
+I1112 22:55:08.572635 36948 module.py:137] append sent back job: 59
+I1112 22:55:08.573420 36951 pipeline.py:277] Sent job 107 to module writer
+I1112 22:55:08.574822 36951 pipeline.py:277] Sent job 108 to module writer
+I1112 22:55:08.579807 36951 pipeline.py:277] Sent job 109 to module writer
+I1112 22:55:08.580456 36951 pipeline.py:277] Sent job 110 to module writer
+I1112 22:55:08.580974 36951 pipeline.py:277] Sent job 111 to module writer
+I1112 22:55:08.581471 36951 pipeline.py:277] Sent job 112 to module writer
+I1112 22:55:08.581979 36951 pipeline.py:277] Sent job 113 to module writer
+I1112 22:55:08.582568 36951 pipeline.py:277] Sent job 114 to module writer
+I1112 22:55:08.583456 36948 module.py:108] append received job: 60
+I1112 22:55:08.584362 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.6000000000000001}_
+I1112 22:55:08.583456 36948 module.py:108] append received job: 60
+I1112 22:55:08.584362 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.6000000000000001}_
+I1112 22:55:08.585741 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.6000000000000001}_append_{"num": 2000}_
+I1112 22:55:08.585741 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.5, "mult": 0.6000000000000001}_append_{"num": 2000}_
+I1112 22:55:08.594405 36949 module.py:137] writer sent back job: 23
+I1112 22:55:08.594405 36949 module.py:137] writer sent back job: 23
+I1112 22:55:08.595184 36951 pipeline.py:225] Job 23 completed.
+I1112 22:55:08.597673 36949 module.py:108] writer received job: 24
+I1112 22:55:08.598187 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_
+I1112 22:55:08.598793 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_writer_{"subtract": -1.0, "classifier": "DT"}_
+I1112 22:55:08.597673 36949 module.py:108] writer received job: 24
+I1112 22:55:08.598187 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_
+I1112 22:55:08.598793 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_writer_{"subtract": -1.0, "classifier": "DT"}_
+I1112 22:55:08.605760 36948 module.py:137] append sent back job: 60
+I1112 22:55:08.605760 36948 module.py:137] append sent back job: 60
+I1112 22:55:08.608270 36951 pipeline.py:277] Sent job 115 to module writer
+I1112 22:55:08.608843 36951 pipeline.py:277] Sent job 116 to module writer
+I1112 22:55:08.609361 36951 pipeline.py:277] Sent job 117 to module writer
+I1112 22:55:08.609890 36951 pipeline.py:277] Sent job 118 to module writer
+I1112 22:55:08.610460 36951 pipeline.py:277] Sent job 119 to module writer
+I1112 22:55:08.610975 36951 pipeline.py:277] Sent job 120 to module writer
+I1112 22:55:08.611578 36951 pipeline.py:277] Sent job 121 to module writer
+I1112 22:55:08.612226 36951 pipeline.py:277] Sent job 122 to module writer
+I1112 22:55:08.612818 36948 module.py:108] append received job: 69
+I1112 22:55:08.612818 36948 module.py:108] append received job: 69
+I1112 22:55:08.613629 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 2.0, "mult": 0.2}_
+I1112 22:55:08.613629 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 2.0, "mult": 0.2}_
+I1112 22:55:08.614579 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 2.0, "mult": 0.2}_append_{"num": 1000}_
+I1112 22:55:08.614579 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 2.0, "mult": 0.2}_append_{"num": 1000}_
+I1112 22:55:08.627795 36949 module.py:137] writer sent back job: 24
+I1112 22:55:08.627795 36949 module.py:137] writer sent back job: 24
+I1112 22:55:08.627969 36951 pipeline.py:225] Job 24 completed.
+I1112 22:55:08.629648 36949 module.py:108] writer received job: 25
+I1112 22:55:08.629648 36949 module.py:108] writer received job: 25
+I1112 22:55:08.630332 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_
+I1112 22:55:08.630332 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_
+I1112 22:55:08.631201 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_writer_{"subtract": -1.0, "classifier": "KNN"}_
+I1112 22:55:08.631201 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_writer_{"subtract": -1.0, "classifier": "KNN"}_
+I1112 22:55:08.648009 36948 module.py:137] append sent back job: 69
+I1112 22:55:08.648009 36948 module.py:137] append sent back job: 69
+I1112 22:55:08.649944 36951 pipeline.py:277] Sent job 123 to module writer
+I1112 22:55:08.653841 36948 module.py:108] append received job: 70
+I1112 22:55:08.653841 36948 module.py:108] append received job: 70
+I1112 22:55:08.653858 36951 pipeline.py:277] Sent job 124 to module writer
+I1112 22:55:08.654849 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 2.0, "mult": 0.2}_
+I1112 22:55:08.654849 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 2.0, "mult": 0.2}_
+I1112 22:55:08.655960 36951 pipeline.py:277] Sent job 125 to module writer
+I1112 22:55:08.658097 36951 pipeline.py:277] Sent job 126 to module writer
+I1112 22:55:08.659821 36951 pipeline.py:277] Sent job 127 to module writer
+I1112 22:55:08.661489 36951 pipeline.py:277] Sent job 128 to module writer
+I1112 22:55:08.659327 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 2.0, "mult": 0.2}_append_{"num": 2000}_
+I1112 22:55:08.659327 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 2.0, "mult": 0.2}_append_{"num": 2000}_
+I1112 22:55:08.662364 36951 pipeline.py:277] Sent job 129 to module writer
+I1112 22:55:08.663325 36951 pipeline.py:277] Sent job 130 to module writer
+I1112 22:55:08.664197 36949 module.py:137] writer sent back job: 25
+I1112 22:55:08.664197 36949 module.py:137] writer sent back job: 25
+I1112 22:55:08.664774 36951 pipeline.py:225] Job 25 completed.
+I1112 22:55:08.666148 36949 module.py:108] writer received job: 26
+I1112 22:55:08.666148 36949 module.py:108] writer received job: 26
+I1112 22:55:08.666976 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_
+I1112 22:55:08.666976 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_
+I1112 22:55:08.667690 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_writer_{"subtract": -1.0, "classifier": "RandomForest"}_
+I1112 22:55:08.667690 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_writer_{"subtract": -1.0, "classifier": "RandomForest"}_
+I1112 22:55:08.677323 36948 module.py:137] append sent back job: 70
+I1112 22:55:08.677323 36948 module.py:137] append sent back job: 70
+I1112 22:55:08.678826 36949 module.py:137] writer sent back job: 26
+I1112 22:55:08.678826 36949 module.py:137] writer sent back job: 26
+I1112 22:55:08.680345 36949 module.py:108] writer received job: 27
+I1112 22:55:08.680345 36949 module.py:108] writer received job: 27
+I1112 22:55:08.679716 36951 pipeline.py:277] Sent job 131 to module writer
+I1112 22:55:08.680797 36951 pipeline.py:277] Sent job 132 to module writer
+I1112 22:55:08.681365 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_
+I1112 22:55:08.681365 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_
+I1112 22:55:08.682462 36951 pipeline.py:277] Sent job 133 to module writer
+I1112 22:55:08.683021 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_writer_{"subtract": -1.0, "classifier": "Adaboost"}_
+I1112 22:55:08.683021 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_writer_{"subtract": -1.0, "classifier": "Adaboost"}_
+I1112 22:55:08.686022 36951 pipeline.py:277] Sent job 134 to module writer
+I1112 22:55:08.688131 36951 pipeline.py:277] Sent job 135 to module writer
+I1112 22:55:08.689140 36951 pipeline.py:277] Sent job 136 to module writer
+I1112 22:55:08.690928 36951 pipeline.py:277] Sent job 137 to module writer
+I1112 22:55:08.691853 36951 pipeline.py:277] Sent job 138 to module writer
+I1112 22:55:08.687465 36948 module.py:108] append received job: 79
+I1112 22:55:08.690931 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 2.0, "mult": 0.4}_
+I1112 22:55:08.687465 36948 module.py:108] append received job: 79
+I1112 22:55:08.690931 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 2.0, "mult": 0.4}_
+I1112 22:55:08.691940 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 2.0, "mult": 0.4}_append_{"num": 1000}_
+I1112 22:55:08.691940 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 2.0, "mult": 0.4}_append_{"num": 1000}_
+I1112 22:55:08.692508 36951 pipeline.py:225] Job 26 completed.
+I1112 22:55:08.703444 36949 module.py:137] writer sent back job: 27
+I1112 22:55:08.703444 36949 module.py:137] writer sent back job: 27
+I1112 22:55:08.705086 36951 pipeline.py:225] Job 27 completed.
+I1112 22:55:08.707307 36948 module.py:137] append sent back job: 79
+I1112 22:55:08.707307 36948 module.py:137] append sent back job: 79
+I1112 22:55:08.708530 36951 pipeline.py:277] Sent job 139 to module writer
+I1112 22:55:08.708827 36948 module.py:108] append received job: 80
+I1112 22:55:08.708827 36948 module.py:108] append received job: 80
+I1112 22:55:08.709347 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 2.0, "mult": 0.4}_
+I1112 22:55:08.709347 36948 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 2.0, "mult": 0.4}_
+I1112 22:55:08.709419 36951 pipeline.py:277] Sent job 140 to module writer
+I1112 22:55:08.709999 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 2.0, "mult": 0.4}_append_{"num": 2000}_
+I1112 22:55:08.709999 36948 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 2.0, "mult": 0.4}_append_{"num": 2000}_
+I1112 22:55:08.710802 36951 pipeline.py:277] Sent job 141 to module writer
+I1112 22:55:08.711935 36949 module.py:108] writer received job: 28
+I1112 22:55:08.711935 36949 module.py:108] writer received job: 28
+I1112 22:55:08.711863 36951 pipeline.py:277] Sent job 142 to module writer
+I1112 22:55:08.713094 36951 pipeline.py:277] Sent job 143 to module writer
+I1112 22:55:08.712714 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_
+I1112 22:55:08.713960 36951 pipeline.py:277] Sent job 144 to module writer
+I1112 22:55:08.712714 36949 module.py:165] Load data from file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_
+I1112 22:55:08.714689 36951 pipeline.py:277] Sent job 145 to module writer
+I1112 22:55:08.714768 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_writer_{"subtract": -1.0, "classifier": "GradientBoost"}_
+I1112 22:55:08.715421 36951 pipeline.py:277] Sent job 146 to module writer
+I1112 22:55:08.714768 36949 module.py:184] Save data to file 2019-11-12_22h55m02s/data.jsonreader_{"add": 1.0, "mult": 0.2}_append_{"num": 2000}_writer_{"subtract": -1.0, "classifier": "GradientBoost"}_
+I1112 22:55:08.740278 36948 module.py:137] append sent back job: 80
+I1112 22:55:08.740278 36948 module.py:137] append sent back job: 80
+I1112 22:55:08.744283 36951 pipeline.py:277] Sent job 147 to module writer
