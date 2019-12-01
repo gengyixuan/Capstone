@@ -4,3 +4,7 @@ glove.6B.300d.txt
 __pycache__/
 ACAI/mock_space
 ACAI/metadata
+*/acai_output
+.ipynb_checkpoints
+*.pyc
+*/raw_data

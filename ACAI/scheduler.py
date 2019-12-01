@@ -95,8 +95,11 @@ class Scheduler:
         # Delete temporary scripts
         for node in self.graph:
             temp_script = "{}_{}.py".format(self.workspace, node.node_name)
+            temp_zip = "{}_{}.zip".format(self.workspace, node.node_name)
             if os.path.exists(temp_script):
                 os.remove(temp_script)
+            if os.path.exists(temp_zip):
+                os.remove(temp_zip)
         # Retrieve results
         self.retrieve_result(self.optim_info['result_node'])
 
