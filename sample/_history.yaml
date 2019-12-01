@@ -3,32 +3,35 @@ credentials:
   ACAI_TOKEN: db6z5ZgLroOzOun1tHnVrrgpI4GWH1s4
 file_versions:
   _append1.py:
-    time: '1575169060.2580776'
-    version: 1
+    time: '1575232396.3794832'
+    version: 2
   _append1.zip:
     time: '1575017067.2262132'
     version: 0
   _append2.py:
-    time: '1575169060.2587717'
-    version: 1
+    time: '1575232396.3792806'
+    version: 2
   _append2.zip:
     time: '1575017067.2264874'
     version: 0
   _history.yaml:
-    time: '1575169499.2512934'
-    version: 32
+    time: '1575232667.293892'
+    version: 37
   _reader.py:
-    time: '1575169059.944501'
-    version: 1
+    time: '1575232396.0688047'
+    version: 2
   _reader.zip:
     time: '1575017067.2286026'
     version: 0
   _writer.py:
-    time: '1575169060.6691837'
-    version: 1
+    time: '1575232396.688214'
+    version: 2
   _writer.zip:
     time: '1575017067.228859'
     version: 0
+  bayesian_curve.pdf:
+    time: '1575232679.6584299'
+    version: 1
   config.yaml:
     time: '1575086674.3626165'
     version: 2

@@ -214,7 +214,7 @@ class LogManager:
         return path_hp_dict
             
 
-    def save_result(self, node_name, results):
+    def save_result(self, node_name, results, workspace):
         # key: version (last node), val: metric (dict)
         metric_dict = {}
 
@@ -239,10 +239,11 @@ class LogManager:
 
         # print(metric_dict)
         # print(hp_dict)
-        if not os.path.exists(OUTPUT_PATH):
-            os.mkdir(OUTPUT_PATH)
+        output_path = workspace + "/" + OUTPUT_PATH
+        if not os.path.exists(output_path):
+            os.mkdir(output_path)
 
-        evaluation_full_result_path = OUTPUT_PATH + "/eval_full.csv"
+        evaluation_full_result_path = output_path + "/eval_full.csv"
         header_row = ['JOB'] + list(metric_set) + list(node_set)
         # print(header_row)
 
@@ -310,7 +311,7 @@ class LogManager:
 
             ranked_res = sorted(one_metric_dict.items(), key=lambda item:item[1], reverse=True)
 
-            evaluation_one_result_path = OUTPUT_PATH + "/eval_" + str(one_metric) + ".csv"
+            evaluation_one_result_path = output_path + "/eval_" + str(one_metric) + ".csv"
             header_row = ['job'] + [one_metric] + list(node_set)
 
             with open(evaluation_one_result_path, 'w') as outfile:

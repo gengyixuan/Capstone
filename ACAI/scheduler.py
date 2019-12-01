@@ -1,9 +1,11 @@
 import time
 import os
 import pickle as pkl
+import numpy as np
 from threading import Thread
 from zipfile import ZipFile
 from termcolor import colored
+from matplotlib import pyplot as plt
 
 from log_manager import LogManager
 from constants import *
@@ -124,6 +126,7 @@ class Scheduler:
         last_rst = None
         hps = None
         best_rst = None
+        best_rsts = []
         no_improve_count = 0
         max_no_improve_count = 10
         count = 1
@@ -178,6 +181,17 @@ class Scheduler:
                 no_improve_count += 1
                 print(colored("No improvement in {} continuous searches".format(no_improve_count), 'blue'))
             count += 1
+            best_rsts.append(best_rst)
+        # Draw performance curve
+        output_path = self.workspace + "/" + OUTPUT_PATH
+        if not os.path.exists(output_path):
+            os.mkdir(output_path)
+        xind = np.arange(1, len(best_rsts) + 1)
+        plt.plot(xind, best_rsts, 'b', marker='^')
+        plt.title('Performance curve with search iterations')
+        plt.xlabel('# of search iterations')
+        plt.ylabel(self.optim_info['metric'])
+        plt.savefig('{}/{}_curve.pdf'.format(output_path, self.optim_info['search']))
 
     # Submit all jobs for target node to ACAI System
     # node: target Node
@@ -382,7 +396,7 @@ class Scheduler:
                 if not isinstance(rst[metric], (int, float, list, dict)):
                     rst.pop(metric, None)
             results[ver] = rst
-        self.log_manager.save_result(node_name, results)
+        self.log_manager.save_result(node_name, results, self.workspace)
         if os.path.exists(tmp_dir):
             import shutil
             shutil.rmtree(tmp_dir)
