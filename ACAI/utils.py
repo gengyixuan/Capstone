@@ -1,7 +1,7 @@
 # for node class
 class Node:
     def __init__(self, node_name="", script_path="", script_version=0,
-                 input_nodes=[], dependencies=[], output_nodes=[], hyperparams={}):
+                 input_nodes=[], dependencies=[], output_nodes=[], hyperparams={}, isResult=False):
         self.node_name = node_name
         self.script_path = script_path
         self.script_version = script_version
@@ -10,6 +10,7 @@ class Node:
         self.dependencies = dependencies
         self.output_nodes = output_nodes
         self.hyper_parameter = hyperparams
+        self.isResult = isResult
     
     def toStr(self):
         template = "name: {}\nscript: {}\nversion: {}\ninput: {}\noutput: {}\nhparams: {}"

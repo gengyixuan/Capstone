@@ -23,7 +23,7 @@ if __name__ == '__main__':
 
     # Begin workflow
     gc = GraphConstructor(workspace, args.local)
-    graph = gc.load_graph()
+    graph, opt_info = gc.load_graph()
     mock = None
     if args.local:
         mock = Mock(workspace, MOCK_PATH)

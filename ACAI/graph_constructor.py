@@ -190,7 +190,7 @@ class GraphConstructor(object):
                             break
 
             # continue building the new node
-            hyperparams = module['params']
+            hyperparams = {} if 'params' not in module else module['params']
             input_nodes = [] if 'input_nodes' not in module else module['input_nodes']
             newnode = Node(node_name=node_name,
                           script_path=script_path,
@@ -198,7 +198,8 @@ class GraphConstructor(object):
                           input_nodes=input_nodes,
                           output_nodes=[],
                           dependencies=[] if 'dependencies' not in module else module['dependencies'],
-                          hyperparams=hyperparams)
+                          hyperparams=hyperparams,
+                          isResult=('optimize' in module))
             compute_nodes[node_name] = newnode
 
             # check if this node is the one to optimize

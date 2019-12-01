@@ -1,0 +1,83 @@
+credentials:
+  ACAI_PROJECT: qa_bidaf_local3
+  ACAI_TOKEN: mdC212M61AeFmoeVfKDVYTP29xZlDcq7
+file_versions:
+  .vector_cache/glove.6B.100d.txt:
+    time: '1575172970.2362933'
+    version: 0
+  .vector_cache/glove.6B.200d.txt:
+    time: '1575172978.1163304'
+    version: 0
+  .vector_cache/glove.6B.300d.txt:
+    time: '1575172990.6001537'
+    version: 0
+  .vector_cache/glove.6B.50d.txt:
+    time: '1575172966.0962715'
+    version: 0
+  .vector_cache/glove.6B.50d.txt.pt:
+    time: '1575173007.159927'
+    version: 0
+  .vector_cache/glove.6B.zip:
+    time: '1575172964.1602612'
+    version: 0
+  __pycache__/evaluate.cpython-37.pyc:
+    time: '1575219524.4824355'
+    version: 0
+  __pycache__/preprocess.cpython-37.pyc:
+    time: '1575219162.5571616'
+    version: 0
+  __pycache__/train.cpython-37.pyc:
+    time: '1575219246.1414557'
+    version: 0
+  _history.yaml:
+    time: '1575166402.7804325'
+    version: 0
+  config.yaml:
+    time: '1575219719.1551216'
+    version: 1
+  data/squad/dev-v1.1.json:
+    time: '1575172319.744625'
+    version: 1
+  data/squad/train-v1.1.json:
+    time: '1575172320.008627'
+    version: 1
+  dev:
+    time: '1575219544.1545048'
+    version: 0
+  evaluate.py:
+    time: '1575219510.0583847'
+    version: 0
+  local_simulation_pipeline.py:
+    time: '1575219375.1899097'
+    version: 0
+  preprocess.py:
+    time: '1575219158.8091483'
+    version: 1
+  train:
+    time: '1575219541.5664957'
+    version: 0
+  train.py:
+    time: '1575219243.6934469'
+    version: 1
+  utils/__init__.py:
+    time: '1558373835.0'
+    version: 0
+  utils/__pycache__/__init__.cpython-37.pyc:
+    time: '1575171673.5718591'
+    version: 0
+  utils/__pycache__/nn.cpython-37.pyc:
+    time: '1575171673.5798593'
+    version: 0
+  utils/nn.py:
+    time: '1558373835.0'
+    version: 0
+script_versions:
+  evaluate:
+    script_path: evaluate.py
+    version: 0
+  preprocess:
+    script_path: preprocess.py
+    version: 1
+  train:
+    script_path: train.py
+    version: 1

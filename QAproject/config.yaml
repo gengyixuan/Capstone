@@ -1,0 +1,82 @@
+pipeline: # Pipeline section, defines pipeline's properties
+    project_name: qa_bidaf_local4 # Name of the pipeline
+    admin_token: EmDlCTBF1ppONSciYVd03M9xkmF6hFqW
+    user_name: AnalyticsTeam
+
+
+modules:
+    -   node: preprocess # Name of the module
+        script: preprocess.py
+        dependencies:
+            -   data
+        params:
+            -   name: train_batch_size
+                type: int # Type of the param, int, float or collection
+                start: 4
+                end: 8
+                step_size: 4
+            -   name: dev_batch_size
+                type: int 
+                start: 4
+                end: 4
+                step_size: 1
+            -   name: context_threshold
+                type: int
+                start: 10
+                end: 20
+                step_size: 10
+            -   name: word_dim
+                type: int
+                start: 50
+                end: 50
+                step_size: 1
+
+    -   node: train # Name of the module
+        script: train.py
+        dependencies:
+            -   utils
+        input_nodes:
+            -   preprocess
+        params:
+            -   name: exp_decay_rate
+                type: float
+                start: 0.1
+                end: 0.1
+                step_size: 0.1
+            -   name: learning_rate
+                type: float
+                start: 0.001
+                end: 0.001
+                step_size: 0.1
+            -   name: epoch
+                type: int
+                start: 1
+                end: 1
+                step_size: 1
+            -   name: char_dim
+                type: int
+                start: 8
+                end: 8
+                step_size: 1
+            -   name: char_channel_width
+                type: int
+                start: 2
+                end: 4
+                step_size: 1
+            -   name: hidden_size
+                type: int
+                start: 64
+                end: 128
+                step_size: 4
+            -   name: dropout
+                type: float
+                start: 0.8
+                end: 0.9
+                step_size: 0.1
+    -   node: evaluate # Name of the module
+        script: evaluate.py
+        dependencies:
+            -   utils
+        input_nodes:
+            -   preprocess
+            -   train
