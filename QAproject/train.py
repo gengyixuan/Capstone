@@ -12,22 +12,23 @@ import torch.nn.functional as F
 from utils.nn import LSTM, Linear
 
 
+
 # hps: 
 class BiDAF(nn.Module):
-    def __init__(self, hps, pretrained):
+    def __init__(self, hps):
         super(BiDAF, self).__init__()
         self.hps= hps
         # 1. Character Embedding Layer
         self.char_emb = nn.Embedding(hps["char_vocab_size"], hps["char_dim"], padding_idx=1)
         nn.init.uniform_(self.char_emb.weight, -0.001, 0.001)
-        hps['char_channel_size'] = self.hps["hidden_size"] * 2 - self.hps["word_dim"]
+        hps['char_channel_size'] = hps["hidden_size"] * 2 - hps["word_dim"]
         assert hps['char_channel_size'] > 0
 
         self.char_conv = nn.Conv2d(1, hps["char_channel_size"], (hps["char_dim"], hps["char_channel_width"]))
 
         # 2. Word Embedding Layer
         # initialize word embedding with GloVe
-        self.word_emb = nn.Embedding.from_pretrained(pretrained, freeze=True)
+        self.word_emb = nn.Embedding(50000, 50)
 
         # highway network
         # assert self.hps["hidden_size"] * 2 == (self.hps["char_channel_size"] + self.hps["word_dim"])
@@ -80,6 +81,7 @@ class BiDAF(nn.Module):
 
     def forward(self, batch):
         # TODO: More memory-efficient architecture
+        b_c_word, b_c_char, b_q_word, b_q_char, b_s_idx, b_e_idx, b_id = batch
         def char_emb_layer(x):
             """
             :param x: (batch, seq_len, word_len)
@@ -179,13 +181,13 @@ class BiDAF(nn.Module):
             return p1, p2
 
         # 1. Character Embedding Layer
-        c_char = char_emb_layer(batch.c_char)
-        q_char = char_emb_layer(batch.q_char)
+        c_char = char_emb_layer(b_c_char)
+        q_char = char_emb_layer(b_q_char)
         # 2. Word Embedding Layer
-        c_word = self.word_emb(batch.c_word[0])
-        q_word = self.word_emb(batch.q_word[0])
-        c_lens = batch.c_word[1]
-        q_lens = batch.q_word[1]
+        c_word = self.word_emb(b_c_word[0])
+        q_word = self.word_emb(b_q_word[0])
+        c_lens = b_c_word[1]
+        q_lens = b_q_word[1]
 
         # Highway network
         c = highway_network(c_char, c_word)
@@ -224,12 +226,17 @@ class EMA():
 # hps: exp_decay_rate, learning_rate, epoch
 # char_vocab_size, char_dim, char_channel_width, hidden_size, word_dim, dropout
 def train(inputs, hps):
-    data = inputs['preprocess']
-    hps['char_vocab_size'] = len(data.CHAR.vocab)
-    hps['word_vocab_size'] = len(data.WORD.vocab)
+    hps["char_dim"] = int(hps["char_dim"])
+    hps["hidden_size"] = int(hps["hidden_size"])
+    hps['char_channel_width'] = int(hps["char_channel_width"])
+    hps['epoch'] = int(hps['epoch'])
+
+    trainiter, deviter, char_vocab_len, word_vocab_len, data_word_vocab_itos = inputs['preprocess']
+    hps['char_vocab_size'] = char_vocab_len
+    hps['word_vocab_size'] = word_vocab_len
     hps['word_dim'] = 50  # fixed
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    model = BiDAF(hps, data.WORD.vocab.vectors).to(device)
+    model = BiDAF(hps).to(device)
 
     ema = EMA(hps["exp_decay_rate"])
     for name, param in model.named_parameters():
@@ -245,25 +252,22 @@ def train(inputs, hps):
     loss, last_epoch = 0, -1
     max_dev_exact, max_dev_f1 = -1, -1
 
-    iterator = data.train_iter
-    for i, batch in enumerate(iterator):
-        present_epoch = int(iterator.epoch)
-        if present_epoch == hps["epoch"]:
-            break
-        if present_epoch > last_epoch:
-            print('epoch:', present_epoch + 1)
-        last_epoch = present_epoch
+    iterator = trainiter
+    for present_epoch in range(hps['epoch']):
+        for i, batch in enumerate(iterator):
+            b_c_word, b_c_char, b_q_word, b_q_char, b_s_idx, b_e_idx, b_id = batch
+            last_epoch = present_epoch
 
-        p1, p2 = model(batch)
+            p1, p2 = model(batch)
 
-        optimizer.zero_grad()
-        batch_loss = criterion(p1, batch.s_idx) + criterion(p2, batch.e_idx)
-        loss += batch_loss.item()
-        batch_loss.backward()
-        optimizer.step()
+            optimizer.zero_grad()
+            batch_loss = criterion(p1, b_s_idx) + criterion(p2, b_e_idx)
+            loss += batch_loss.item()
+            batch_loss.backward()
+            optimizer.step()
 
-        for name, param in model.named_parameters():
-            if param.requires_grad:
-                ema.update(name, param.data)
+            for name, param in model.named_parameters():
+                if param.requires_grad:
+                    ema.update(name, param.data)
 
     return model

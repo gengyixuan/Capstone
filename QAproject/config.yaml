@@ -1,5 +1,5 @@
 pipeline: # Pipeline section, defines pipeline's properties
-    project_name: qa_bidaf_local4 # Name of the pipeline
+    project_name: qa_bidaf_local30 # Name of the pipeline
     admin_token: EmDlCTBF1ppONSciYVd03M9xkmF6hFqW
     user_name: AnalyticsTeam
 
@@ -11,25 +11,20 @@ modules:
             -   data
         params:
             -   name: train_batch_size
-                type: int # Type of the param, int, float or collection
-                start: 4
-                end: 8
-                step_size: 4
+                type: float # Type of the param, int, float or collection
+                start: 4.0
+                end: 8.0
+                step_size: 4.0
             -   name: dev_batch_size
-                type: int 
-                start: 4
-                end: 4
-                step_size: 1
+                type: float
+                start: 4.0
+                end: 4.0
+                step_size: 1.0
             -   name: context_threshold
-                type: int
-                start: 10
-                end: 20
-                step_size: 10
-            -   name: word_dim
-                type: int
-                start: 50
-                end: 50
-                step_size: 1
+                type: float
+                start: 10.0
+                end: 20.0
+                step_size: 10.0
 
     -   node: train # Name of the module
         script: train.py
@@ -49,34 +44,41 @@ modules:
                 end: 0.001
                 step_size: 0.1
             -   name: epoch
-                type: int
-                start: 1
-                end: 1
-                step_size: 1
+                type: float
+                start: 1.0
+                end: 1.0
+                step_size: 1.0
             -   name: char_dim
-                type: int
-                start: 8
-                end: 8
-                step_size: 1
+                type: float
+                start: 8.0
+                end: 8.0
+                step_size: 1.0
             -   name: char_channel_width
-                type: int
-                start: 2
-                end: 4
-                step_size: 1
+                type: float
+                start: 2.0
+                end: 4.0
+                step_size: 1.0
             -   name: hidden_size
-                type: int
-                start: 64
-                end: 128
-                step_size: 4
+                type: float
+                start: 64.0
+                end: 128.0
+                step_size: 4.0
             -   name: dropout
                 type: float
                 start: 0.8
                 end: 0.9
                 step_size: 0.1
+
     -   node: evaluate # Name of the module
         script: evaluate.py
         dependencies:
             -   utils
+            -   data
+            -   train.py
         input_nodes:
             -   preprocess
             -   train
+        optimize:
+            -   metric: loss
+                direction: min # min | max
+                search: bayesian # grid | bayesian (if bayesian, must be all float)

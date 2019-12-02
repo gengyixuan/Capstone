@@ -204,7 +204,7 @@ class GraphConstructor(object):
 
             # check if this node is the one to optimize
             if 'optimize' in module:
-                opt = module['optimize']
+                opt = module['optimize'][0]
                 optimization_info['result_node'] = newnode
                 optimization_info["search"] = opt['search'].lower()
                 optimization_info["metric"] = opt['metric']

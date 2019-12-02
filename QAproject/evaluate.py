@@ -59,12 +59,12 @@ def eval(dataset, predictions):
     for article in dataset:
         for paragraph in article['paragraphs']:
             for qa in paragraph['qas']:
-                total += 1
                 if qa['id'] not in predictions:
                     message = 'Unanswered question ' + qa['id'] + \
                               ' will receive score 0.'
-                    print(message, file=sys.stderr)
+                    #print(message, file=sys.stderr)
                     continue
+                total += 1
                 ground_truths = list(map(lambda x: x['text'], qa['answers']))
                 prediction = predictions[qa['id']]
                 exact_match += metric_max_over_ground_truths(
@@ -77,7 +77,8 @@ def eval(dataset, predictions):
 
     return {'exact_match': exact_match, 'f1': f1} 
 
-def test(model, data):
+def test(model, deviter, data_word_vocab_itos):
+    print("start test")
     device = torch.device(f"cuda:0" if torch.cuda.is_available() else "cpu")
     criterion = nn.CrossEntropyLoss()
     loss = 0
@@ -85,9 +86,10 @@ def test(model, data):
     model.eval()
 
     with torch.set_grad_enabled(False):
-        for batch in iter(data.dev_iter):
+        for batch in deviter:
             p1, p2 = model(batch)
-            batch_loss = criterion(p1, batch.s_idx) + criterion(p2, batch.e_idx)
+            b_c_word, b_c_char, b_q_word, b_q_char, b_s_idx, b_e_idx, b_id = batch
+            batch_loss = criterion(p1, b_s_idx) + criterion(p2, b_e_idx)
             loss += batch_loss.item()
 
             # (batch, c_len, c_len)
@@ -100,9 +102,9 @@ def test(model, data):
             s_idx = torch.gather(s_idx, 1, e_idx.view(-1, 1)).squeeze()
 
             for i in range(batch_size):
-                id = batch.id[i]
-                answer = batch.c_word[0][i][s_idx[i]:e_idx[i]+1]
-                answer = ' '.join([data.WORD.vocab.itos[idx] for idx in answer])
+                id = b_id[i]
+                answer = b_c_word[0][i][s_idx[i]:e_idx[i]+1]
+                answer = ' '.join([data_word_vocab_itos[idx] for idx in answer])
                 answers[id] = answer
 
     predictions = answers
@@ -121,4 +123,5 @@ def test(model, data):
     return results #results['loss'], results['exact_match'], results['f1']
 
 def evaluate(inputs, hps):
-    return test(inputs['train'], inputs['preprocess'])
+    trainiter, deviter, char_vocab_len, word_vocab_len, data_word_vocab_itos = inputs['preprocess']
+    return test(inputs['train'], deviter, data_word_vocab_itos)
