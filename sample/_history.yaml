@@ -15,8 +15,8 @@ file_versions:
     time: '1575017067.2264874'
     version: 0
   _history.yaml:
-    time: '1575232829.5210197'
-    version: 38
+    time: '1575344744.136172'
+    version: 41
   _reader.py:
     time: '1575232396.0688047'
     version: 2
@@ -33,8 +33,8 @@ file_versions:
     time: '1575232679.6584299'
     version: 1
   config.yaml:
-    time: '1575086674.3626165'
-    version: 2
+    time: '1575344741.3490753'
+    version: 4
   data1/file1.txt:
     time: '1572292235.7481885'
     version: 1
