@@ -303,13 +303,24 @@ class LogManager:
                 metric_cand.append(tmpmetric)
 
         # print(metric_cand)
+
+        # key: metric, val: big to small (True), small to big (False)
+        metric_cand_sort_dict = {}
+
+        # for testing
+        for one_metric in metric_cand:
+             metric_cand_sort_dict[one_metric] = True
+
         for one_metric in metric_cand:
             # ranking
             one_metric_dict = {}
             for ver in metric_dict:
                 one_metric_dict[ver] = metric_dict[ver][one_metric]
 
-            ranked_res = sorted(one_metric_dict.items(), key=lambda item:item[1], reverse=True)
+            if metric_cand_sort_dict[one_metric]:
+                ranked_res = sorted(one_metric_dict.items(), key=lambda item:item[1], reverse=True)
+            else:
+                ranked_res = sorted(one_metric_dict.items(), key=lambda item:item[1], reverse=False)
 
             evaluation_one_result_path = output_path + "/eval_" + str(one_metric) + ".csv"
             header_row = ['job'] + [one_metric] + list(node_set)

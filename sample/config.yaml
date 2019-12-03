@@ -56,6 +56,6 @@ modules:
                 end: 1.0
                 step_size: 1
         optimize:
-                metric: sum_of_stuff
+            -   metric: sum_of_stuff
                 direction: max # min | max
                 search: bayesian # grid | bayesian (if bayesian, must be all float)

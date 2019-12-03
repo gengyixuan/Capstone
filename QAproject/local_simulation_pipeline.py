@@ -37,6 +37,8 @@ from train import *
 from evaluate import *
 from preprocess import *
 
+import pickle as pkl
+
 hps = {
     "train_batch_size": 4,
     "dev_batch_size": 4,
@@ -58,10 +60,12 @@ inputs = {
     "preprocess": out1
 }
 out2 = train(inputs, hps)
+pkl.dump(out2, open('train.pkl', 'wb'))
+in3 = pkl.load(open('train.pkl', 'rb'))
 
 inputs = {
     "preprocess": out1,
-    "train": out2
+    "train": in3
 }
 out3 = evaluate(inputs, None)
 

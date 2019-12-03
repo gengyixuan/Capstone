@@ -5,7 +5,7 @@ import torch
 
 from torchtext import data
 from torchtext import datasets
-from torchtext.vocab import GloVe
+import pickle as pkl
 
 def word_tokenize(tokens):
     return [token.replace("''", '"').replace("``", '"') for token in nltk.word_tokenize(tokens)]
@@ -17,8 +17,8 @@ class SQuAD():
         dataset_path = path + '/torchtext/'
 
         print("preprocessing data files...")
-        self.preprocess_file('data/squad/train-v1.1.json', "train")
-        self.preprocess_file('data/squad/dev-v1.1.json', "dev")
+        # self.preprocess_file('data/squad/train-v1.1.json', "data/train")
+        # self.preprocess_file('data/squad/dev-v1.1.json', "data/dev")
 
         self.RAW = data.RawField()
         # explicit declaration for torchtext compatibility
@@ -42,11 +42,11 @@ class SQuAD():
         print("building splits...")
         self.train, self.dev = data.TabularDataset.splits(
             path="./",
-            train="train",
-            validation="dev",
+            train="data/train",
+            validation="data/dev",
             format='json',
             fields=dict_fields)
-
+        #print([e.c_word for e in self.train.examples])
 
         #cut too long context in the training set for efficiency.
         if hps["context_threshold"] > 0:
@@ -54,16 +54,17 @@ class SQuAD():
 
         print("building vocab...")
         self.CHAR.build_vocab(self.train, self.dev)
-        self.WORD.build_vocab(self.train, self.dev, vectors=GloVe(name='6B', dim=hps["word_dim"]))
+        self.WORD.build_vocab(self.train, self.dev)
 
         print("building iterators...")
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        print(hps['train_batch_size'], hps['dev_batch_size'])
         self.train_iter, self.dev_iter = \
             data.BucketIterator.splits((self.train, self.dev),
                                        batch_sizes=[hps["train_batch_size"], hps["dev_batch_size"]],
                                        device=device,
                                        sort_key=lambda x: len(x.c_word))
-
+        print(len(self.train_iter), len(self.dev_iter))
 
     def preprocess_file(self, path, outname):
         dump = []
@@ -113,8 +114,7 @@ class SQuAD():
                                               ('answer', answer),
                                               ('s_idx', s_idx),
                                               ('e_idx', e_idx)]))
-        dump = dump[:10]
-
+        dump = dump[:1000]
         with open(outname, 'w', encoding='utf-8') as f:
             for line in dump:
                 json.dump(line, f)
@@ -123,5 +123,14 @@ class SQuAD():
 # hps: context_threshold, word_dim, train_batch_size, dev_batch_size
 def preprocess(inputs, hps):
     hps['word_dim'] = 50 # using pretrained Glove
-    return SQuAD(hps)
+    data = SQuAD(hps)
+    iterlist = [(b.c_word, b.c_char, b.q_word, b.q_char, b.s_idx, b.e_idx, b.id) for b in data.dev_iter]
+    training = list(iterlist[:200])
+    development = list(iterlist[200:])
+    char_vocab_len = len(data.CHAR.vocab)
+    word_vocab_len = len(data.WORD.vocab)
+    data_word_vocab_itos = data.WORD.vocab.itos
 
+    rst = training, development, char_vocab_len, word_vocab_len, data_word_vocab_itos
+
+    return rst

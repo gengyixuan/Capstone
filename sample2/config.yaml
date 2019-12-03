@@ -56,6 +56,6 @@ modules:
                     - Adaboost
                     - GradientBoost
         optimize:
-                metric: sum_of_stuff
+            -   metric: sum_of_stuff
                 direction: max # min | max
                 search: grid # grid | bayesian (if bayesian, must be all float)
